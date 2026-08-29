@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-08-29T15:24:52.032Z",
+  "updatedAt": "2026-08-29T15:26:51.381Z",
   "project": "agente_dev",
   "metrics": {
     "totalNodes": 23,
     "totalEdges": 59,
     "totalTasks": 8,
-    "totalLessons": 2
+    "totalLessons": 3
   },
   "nodes": [
     {
@@ -246,7 +246,7 @@
       "id": "task:AGT-0008",
       "label": "AGT-0008: Fix compatibilidad CI CD pnpm v11 con Node 22 y 24",
       "type": "task",
-      "status": "PLANNED",
+      "status": "READY_FOR_PR",
       "taskType": "fix"
     }
   ],
@@ -561,6 +561,13 @@
       "category": "CI_CD",
       "lesson": "pnpm v11 requiere Node.js >= 22.13.0 por modulo nativo node:sqlite. No usar Node 20 en GitHub Actions.",
       "solution": "Configurar actions/setup-node@v4 con node-version 22 o 24 antes de pnpm/action-setup@v4 con run_install false."
+    },
+    {
+      "id": "LES-1335",
+      "timestamp": "2026-08-29T15:26:51.336Z",
+      "category": "WORKFLOW",
+      "lesson": "No crear ramas nuevas para fixes o ajustes menores; commitear directamente en la rama activa con mensajes semánticos o usar --no-branch.",
+      "solution": "Mantenerse en la rama actual y realizar git commit -m 'fix(...)'"
     }
   ]
 }
