@@ -37,11 +37,11 @@ describe('Módulo de Gestión de Tareas (src/task-manager.js)', () => {
     expect(result.files).toHaveLength(5);
 
     // Verificamos la existencia física de cada archivo en el directorio temporal
-    const taskYaml = path.join(tempDir, 'docs', 'workflow', 'tasks', 'TEST-0001.yml');
-    const specMd = path.join(tempDir, 'docs', 'workflow', 'specs', 'TEST-0001.md');
-    const planMd = path.join(tempDir, 'docs', 'workflow', 'plans', 'TEST-0001.md');
-    const testMd = path.join(tempDir, 'docs', 'workflow', 'tests', 'TEST-0001.md');
-    const featureFile = path.join(tempDir, 'docs', 'workflow', 'features', 'TEST-0001.feature');
+    const taskYaml = path.join(tempDir, '.agents', 'workflow', 'tasks', 'TEST-0001.yml');
+    const specMd = path.join(tempDir, '.agents', 'workflow', 'specs', 'TEST-0001.md');
+    const planMd = path.join(tempDir, '.agents', 'workflow', 'plans', 'TEST-0001.md');
+    const testMd = path.join(tempDir, '.agents', 'workflow', 'tests', 'TEST-0001.md');
+    const featureFile = path.join(tempDir, '.agents', 'workflow', 'features', 'TEST-0001.feature');
 
     expect(fs.existsSync(taskYaml)).toBe(true);
     expect(fs.existsSync(specMd)).toBe(true);

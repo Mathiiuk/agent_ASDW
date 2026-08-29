@@ -7,16 +7,16 @@ import yaml from 'js-yaml';
 import { formatBranchName, checkoutBranch, isGitRepo } from './git.js';
 
 /**
- * Rutas relativas estándar de los directorios de trabajo y plantillas
+ * Rutas relativas estándar de los directorios de trabajo y plantillas dentro de .agents/
  */
 const DIRS = {
-  tasks: path.join('docs', 'workflow', 'tasks'),
-  specs: path.join('docs', 'workflow', 'specs'),
-  plans: path.join('docs', 'workflow', 'plans'),
-  tests: path.join('docs', 'workflow', 'tests'),
-  features: path.join('docs', 'workflow', 'features'),
-  executions: path.join('docs', 'workflow', 'executions'),
-  templates: 'templates',
+  tasks: path.join('.agents', 'workflow', 'tasks'),
+  specs: path.join('.agents', 'workflow', 'specs'),
+  plans: path.join('.agents', 'workflow', 'plans'),
+  tests: path.join('.agents', 'workflow', 'tests'),
+  features: path.join('.agents', 'workflow', 'features'),
+  executions: path.join('.agents', 'workflow', 'executions'),
+  templates: path.join('.agents', 'templates'),
 };
 
 /**

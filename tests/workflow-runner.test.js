@@ -69,7 +69,7 @@ describe('Módulo de Bucle Autónomo (src/workflow-runner.js)', () => {
   });
 
   describe('generateExecutionReport()', () => {
-    it('debe crear el archivo de reporte en docs/workflow/executions/<ID>.md', () => {
+    it('debe crear el archivo de reporte en .agents/workflow/executions/<ID>.md', () => {
       const summary = {
         success: true,
         iterations: 1,
@@ -98,7 +98,7 @@ describe('Módulo de Bucle Autónomo (src/workflow-runner.js)', () => {
       });
 
       // Modificamos el manifiesto temporal para que ejecute un comando simple que retorna 0
-      const taskPath = path.join(tempDir, 'docs', 'workflow', 'tasks', 'TEST-LOOP-SUCCESS.yml');
+      const taskPath = path.join(tempDir, '.agents', 'workflow', 'tasks', 'TEST-LOOP-SUCCESS.yml');
       const task = getTask('TEST-LOOP-SUCCESS', tempDir);
       task.quality_gates = { quick_check: true };
       task.commands = { quick_check: 'node -e "process.exit(0)"' };

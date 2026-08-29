@@ -53,7 +53,7 @@ export function diagnoseFailure(results) {
  * @returns {string} - Ruta absoluta del archivo de reporte generado
  */
 export function generateExecutionReport(id, summary, projectRoot = process.cwd()) {
-  const executionsDir = path.join(projectRoot, 'docs', 'workflow', 'executions');
+  const executionsDir = path.join(projectRoot, '.agents', 'workflow', 'executions');
   // Aseguramos que el directorio de ejecuciones exista
   if (!fs.existsSync(executionsDir)) {
     fs.mkdirSync(executionsDir, { recursive: true });

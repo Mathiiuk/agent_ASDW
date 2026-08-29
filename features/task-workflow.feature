@@ -16,11 +16,11 @@ Feature: Task Lifecycle and Git Branch Automation
   Scenario: Creating a new task generates all workflow artifacts and branch
     Given an isolated project environment
     When the user creates a task with ID "AGT-9001", title "OAuth Authentication Flow", and type "feat"
-    Then the task manifest "docs/workflow/tasks/AGT-9001.yml" should exist
-    And the specification document "docs/workflow/specs/AGT-9001.md" should exist
-    And the implementation plan "docs/workflow/plans/AGT-9001.md" should exist
-    And the test plan "docs/workflow/tests/AGT-9001.md" should exist
-    And the Gherkin feature file "docs/workflow/features/AGT-9001.feature" should exist
+    Then the task manifest ".agents/workflow/tasks/AGT-9001.yml" should exist
+    And the specification document ".agents/workflow/specs/AGT-9001.md" should exist
+    And the implementation plan ".agents/workflow/plans/AGT-9001.md" should exist
+    And the test plan ".agents/workflow/tests/AGT-9001.md" should exist
+    And the Gherkin feature file ".agents/workflow/features/AGT-9001.feature" should exist
 
   # ----------------------------------------------------------------------------
   # Escenario 2: Validación de datos obligatorios al crear tarea

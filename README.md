@@ -139,29 +139,27 @@ agt task:status AGT-0001 DONE
 
 ```text
 agente_dev/
-├── .agents/
-│   ├── rules/
-│   │   └── master-workflow.md     # Regla maestra del flujo (Director Técnico)
-│   └── skills/                    # Habilidades especializadas del agente
-├── bin/
-│   └── agente-dev.js              # Punto de entrada ejecutable de la CLI (agt)
-├── docs/
-│   └── workflow/                  # Artefactos generados por cada tarea
-│       ├── tasks/                 # Manifiestos YAML de tareas (<ID>.yml)
-│       ├── specs/                 # Especificaciones técnicas (<ID>.md)
-│       ├── plans/                 # Planes de implementación (<ID>.md)
-│       ├── tests/                 # Matrices y planes de prueba (<ID>.md)
-│       ├── features/              # Especificaciones BDD en Gherkin (<ID>.feature)
-│       └── executions/            # Reportes finales de ejecución (<ID>.md)
+├── .agents/                       # Ecosistema completo del agente (encapsulado)
+│   ├── rules/                     # Reglas maestras de flujo (Director Técnico)
+│   ├── skills/                    # Habilidades especializadas del agente
+│   ├── templates/                 # Plantillas de manifiestos, specs, planes y BDD
+│   ├── workflow/                  # Artefactos generados por cada tarea
+│   │   ├── tasks/                 # Manifiestos YAML (<ID>.yml)
+│   │   ├── specs/                 # Especificaciones técnicas (<ID>.md)
+│   │   ├── plans/                 # Planes de desarrollo (<ID>.md)
+│   │   ├── tests/                 # Matrices de prueba (<ID>.md)
+│   │   ├── features/              # Especificaciones BDD Gherkin (<ID>.feature)
+│   │   └── executions/            # Reportes de ejecución (<ID>.md)
+│   └── examples/                  # Ejemplos de adaptación y manifiestos
+├── bin/                           # Punto de entrada ejecutable de la CLI (agt)
 ├── features/                      # Especificaciones BDD globales del sistema
 ├── src/                           # Código fuente del motor del agente
 │   ├── git.js                     # Integración con Git y cálculo de ramas
 │   ├── task-manager.js            # Gestor de tareas y plantillas
 │   ├── validator.js               # Validador de manifiestos y Quality Gates
+│   ├── workflow-runner.js         # Motor de bucle autónomo y diagnóstico
 │   └── index.js                   # Exportaciones de la librería
-├── templates/                     # Plantillas estándar para tareas y documentos
-│   └── feature.feature            # Plantilla universal Gherkin con comentarios en español
-├── tests/                         # Suite de pruebas unitarias (Vitest) y BDD (Cucumber)
+├── tests/                         # Suite de pruebas unitarias (Vitest) y BDD
 │   └── bdd/steps/                 # Step Definitions en JavaScript para Cucumber
 ├── cucumber.json                  # Configuración centralizada de Cucumber.js
 ├── package.json                   # Configuración del paquete y scripts

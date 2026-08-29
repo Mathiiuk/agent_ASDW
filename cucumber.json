@@ -2,7 +2,7 @@
   "default": {
     "paths": [
       "features/**/*.feature",
-      "docs/workflow/features/**/*.feature"
+      ".agents/workflow/features/**/*.feature"
     ],
     "import": [
       "tests/bdd/steps/**/*.js"

@@ -19,7 +19,7 @@ Toda tarea o desarrollo en el proyecto debe seguir obligatoriamente este marco m
 ## 1. Stack de Skills y Herramientas Integradas
 
 1. **`software-delivery-workflow` (DT / Director Técnico)**:
-   - Toda tarea debe tener sus 5 artefactos en `docs/workflow/`: `tasks/<ID>.yml`, `specs/<ID>.md`, `plans/<ID>.md`, `tests/<ID>.md`, `features/<ID>.feature` y su reporte de cierre en `executions/<ID>.md`.
+   - Toda tarea debe tener sus 5 artefactos en `.agents/workflow/`: `tasks/<ID>.yml`, `specs/<ID>.md`, `plans/<ID>.md`, `tests/<ID>.md`, `features/<ID>.feature` y su reporte de cierre en `executions/<ID>.md`.
 2. **`bdd-spec-writer`**:
    - Redacción de criterios de aceptación ejecutables en Gherkin (inglés con comentarios en español) validados mediante Cucumber (`pnpm test:bdd`).
 3. **`tdd-workflow` & `spec-to-plan`**:
@@ -37,7 +37,7 @@ Toda tarea o desarrollo en el proyecto debe seguir obligatoriamente este marco m
    - `pnpm test` (Unit Tests con Vitest)
    - `pnpm test:bdd` (Escenarios BDD con Cucumber)
    - `agt task:verify <ID>`
-4. **Cierre de Tarea:** Generar `docs/workflow/executions/<ID>.md`, actualizar estado a `READY_FOR_PR` / `DONE` y commitear con mensaje semántico explicativo.
+4. **Cierre de Tarea:** Generar `.agents/workflow/executions/<ID>.md`, actualizar estado a `READY_FOR_PR` / `DONE` y commitear con mensaje semántico explicativo.
 
 ---
 
@@ -52,4 +52,4 @@ Cuando el usuario asigne un requerimiento, el agente debe ejecutar las siguiente
    - Si algún comando o prueba falla, leer detalladamente el stack trace y los logs de error.
    - Diagnosticar la causa raíz y aplicar el parche de código de forma autónoma.
    - Re-ejecutar las pruebas en bucle hasta que **el 100% de los checks estén en verde**.
-5. **Cierre y Notificación:** Crear el reporte de ejecución en `docs/workflow/executions/<ID>.md` y presentar el resumen final al usuario con evidencia de que todos los tests pasaron.
+5. **Cierre y Notificación:** Crear el reporte de ejecución en `.agents/workflow/executions/<ID>.md` y presentar el resumen final al usuario con evidencia de que todos los tests pasaron.
