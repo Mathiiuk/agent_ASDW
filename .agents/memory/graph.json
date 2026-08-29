@@ -1,0 +1,566 @@
+{
+  "updatedAt": "2026-08-29T15:24:52.032Z",
+  "project": "agente_dev",
+  "metrics": {
+    "totalNodes": 23,
+    "totalEdges": 59,
+    "totalTasks": 8,
+    "totalLessons": 2
+  },
+  "nodes": [
+    {
+      "id": "src/git.js",
+      "label": "git.js",
+      "type": "module",
+      "sizeBytes": 6086,
+      "lineCount": 162,
+      "imports": [
+        "node:child_process"
+      ]
+    },
+    {
+      "id": "src/index.js",
+      "label": "index.js",
+      "type": "module",
+      "sizeBytes": 596,
+      "lineCount": 18,
+      "imports": []
+    },
+    {
+      "id": "src/init.js",
+      "label": "init.js",
+      "type": "module",
+      "sizeBytes": 4739,
+      "lineCount": 127,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "node:url"
+      ]
+    },
+    {
+      "id": "src/memory.js",
+      "label": "memory.js",
+      "type": "module",
+      "sizeBytes": 9703,
+      "lineCount": 308,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "./task-manager.js"
+      ]
+    },
+    {
+      "id": "src/task-manager.js",
+      "label": "task-manager.js",
+      "type": "module",
+      "sizeBytes": 11183,
+      "lineCount": 294,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "js-yaml",
+        "./git.js"
+      ]
+    },
+    {
+      "id": "src/validator.js",
+      "label": "validator.js",
+      "type": "module",
+      "sizeBytes": 4455,
+      "lineCount": 155,
+      "imports": [
+        "node:child_process"
+      ]
+    },
+    {
+      "id": "src/workflow-runner.js",
+      "label": "workflow-runner.js",
+      "type": "module",
+      "sizeBytes": 6744,
+      "lineCount": 169,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "./task-manager.js",
+        "./validator.js"
+      ]
+    },
+    {
+      "id": "bin/agente-dev.js",
+      "label": "agente-dev.js",
+      "type": "cli",
+      "sizeBytes": 14204,
+      "lineCount": 378,
+      "imports": [
+        "commander",
+        "picocolors",
+        "../src/index.js"
+      ]
+    },
+    {
+      "id": "tests/bdd/steps/task-steps.js",
+      "label": "task-steps.js",
+      "type": "test",
+      "sizeBytes": 5017,
+      "lineCount": 131,
+      "imports": [
+        "@cucumber/cucumber",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "node:assert",
+        "../../../src/task-manager.js"
+      ]
+    },
+    {
+      "id": "tests/git.test.js",
+      "label": "git.test.js",
+      "type": "test",
+      "sizeBytes": 2520,
+      "lineCount": 62,
+      "imports": [
+        "vitest",
+        "../src/git.js"
+      ]
+    },
+    {
+      "id": "tests/init.test.js",
+      "label": "init.test.js",
+      "type": "test",
+      "sizeBytes": 2837,
+      "lineCount": 63,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "../src/init.js"
+      ]
+    },
+    {
+      "id": "tests/memory.test.js",
+      "label": "memory.test.js",
+      "type": "test",
+      "sizeBytes": 3561,
+      "lineCount": 102,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "../src/memory.js",
+        "./db.js"
+      ]
+    },
+    {
+      "id": "tests/task-manager.test.js",
+      "label": "task-manager.test.js",
+      "type": "test",
+      "sizeBytes": 3898,
+      "lineCount": 102,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "../src/task-manager.js"
+      ]
+    },
+    {
+      "id": "tests/validator.test.js",
+      "label": "validator.test.js",
+      "type": "test",
+      "sizeBytes": 2680,
+      "lineCount": 85,
+      "imports": [
+        "vitest",
+        "../src/validator.js"
+      ]
+    },
+    {
+      "id": "tests/workflow-runner.test.js",
+      "label": "workflow-runner.test.js",
+      "type": "test",
+      "sizeBytes": 4236,
+      "lineCount": 122,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "../src/task-manager.js",
+        "../src/workflow-runner.js"
+      ]
+    },
+    {
+      "id": "task:AGT-0001",
+      "label": "AGT-0001: CLI del Agente de Workflow y Automatización de Ramas Git",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0002",
+      "label": "AGT-0002: Integracion de Motor BDD con Gherkin y Cucumber",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0003",
+      "label": "AGT-0003: Motor de Bucle Autonomo y Auto-Correccion Self-Healing",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0004",
+      "label": "AGT-0004: Consolidacion de Artefactos y Plantillas dentro de .agents",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "refactor"
+    },
+    {
+      "id": "task:AGT-0005",
+      "label": "AGT-0005: Estructurar Skills por Departamentos de Empresa Frontend Backend SEO QA DevOps Seguridad UX DT",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0006",
+      "label": "AGT-0006: Implementacion Completa de CI/CD con GitHub Actions y Quality Gates Automatizados",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0007",
+      "label": "AGT-0007: Implementacion de Memoria Graphify para Ahorro de Tokens y Aprendizaje de Errores",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0008",
+      "label": "AGT-0008: Fix compatibilidad CI CD pnpm v11 con Node 22 y 24",
+      "type": "task",
+      "status": "PLANNED",
+      "taskType": "fix"
+    }
+  ],
+  "edges": [
+    {
+      "from": "src/git.js",
+      "to": "node:child_process",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/init.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/init.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/init.js",
+      "to": "node:url",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/memory.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/memory.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/memory.js",
+      "to": "./task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/task-manager.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/task-manager.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/task-manager.js",
+      "to": "js-yaml",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/task-manager.js",
+      "to": "./git.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/validator.js",
+      "to": "node:child_process",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/workflow-runner.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/workflow-runner.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/workflow-runner.js",
+      "to": "./task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/workflow-runner.js",
+      "to": "./validator.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "bin/agente-dev.js",
+      "to": "commander",
+      "relation": "depends_on"
+    },
+    {
+      "from": "bin/agente-dev.js",
+      "to": "picocolors",
+      "relation": "depends_on"
+    },
+    {
+      "from": "bin/agente-dev.js",
+      "to": "../src/index.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/task-steps.js",
+      "to": "@cucumber/cucumber",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/task-steps.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/task-steps.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/task-steps.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/task-steps.js",
+      "to": "node:assert",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/task-steps.js",
+      "to": "../../../src/task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/git.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/git.test.js",
+      "to": "../src/git.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/init.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/init.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/init.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/init.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/init.test.js",
+      "to": "../src/init.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/memory.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/memory.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/memory.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/memory.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/memory.test.js",
+      "to": "../src/memory.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/memory.test.js",
+      "to": "./db.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/task-manager.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/task-manager.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/task-manager.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/task-manager.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/task-manager.test.js",
+      "to": "../src/task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/validator.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/validator.test.js",
+      "to": "../src/validator.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/workflow-runner.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/workflow-runner.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/workflow-runner.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/workflow-runner.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/workflow-runner.test.js",
+      "to": "../src/task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/workflow-runner.test.js",
+      "to": "../src/workflow-runner.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "task:AGT-0001",
+      "to": ".agents/workflow/tasks/AGT-0001.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0002",
+      "to": ".agents/workflow/tasks/AGT-0002.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0003",
+      "to": ".agents/workflow/tasks/AGT-0003.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0004",
+      "to": ".agents/workflow/tasks/AGT-0004.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0005",
+      "to": ".agents/workflow/tasks/AGT-0005.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0006",
+      "to": ".agents/workflow/tasks/AGT-0006.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0007",
+      "to": ".agents/workflow/tasks/AGT-0007.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0008",
+      "to": ".agents/workflow/tasks/AGT-0008.yml",
+      "relation": "manifested_by"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "LES-1385",
+      "timestamp": "2026-08-29T15:19:31.385Z",
+      "category": "ARCHITECTURE",
+      "lesson": "Asegurar que todas las rutas de artefactos utilicen .agents/workflow/ y .agents/templates/",
+      "solution": "Utilizar las constantes DIRS en src/task-manager.js y MEMORY_PATHS en src/memory.js"
+    },
+    {
+      "id": "LES-2001",
+      "timestamp": "2026-08-29T15:24:52.001Z",
+      "category": "CI_CD",
+      "lesson": "pnpm v11 requiere Node.js >= 22.13.0 por modulo nativo node:sqlite. No usar Node 20 en GitHub Actions.",
+      "solution": "Configurar actions/setup-node@v4 con node-version 22 o 24 antes de pnpm/action-setup@v4 con run_install false."
+    }
+  ]
+}

@@ -36,10 +36,13 @@ describe('Módulo de Inicialización de Proyectos (src/init.js)', () => {
     const targetRules = path.join(tempProjectDir, '.agents', 'rules', 'master-workflow.md');
     const targetTemplates = path.join(tempProjectDir, '.agents', 'templates', 'feature.feature');
     const targetCucumber = path.join(tempProjectDir, 'cucumber.json');
+    const targetCi = path.join(tempProjectDir, '.github', 'workflows', 'ci.yml');
 
     expect(fs.existsSync(targetRules)).toBe(true);
     expect(fs.existsSync(targetTemplates)).toBe(true);
     expect(fs.existsSync(targetCucumber)).toBe(true);
+    expect(fs.existsSync(targetCi)).toBe(true);
+    expect(result.ciCreated).toBe(true);
 
     // Verificamos la creación de la estructura limpia de workflow
     const workflowTasks = path.join(tempProjectDir, '.agents', 'workflow', 'tasks');

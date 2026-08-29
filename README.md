@@ -150,6 +150,22 @@ agt task:status AGT-0001 DONE
 
 ---
 
+### 7. Memoria Graphify (Ahorro de Tokens y Prevención de Errores)
+Construye y consulta el Grafo de Conocimiento del proyecto y la memoria de lecciones aprendidas:
+
+```bash
+# Sincronizar y reconstruir el grafo de dependencias y context.md
+agt memory:sync
+
+# Consultar contexto y dependencias específicas en pocos tokens
+agt memory:query "auth"
+
+# Registrar una lección aprendida o trampa a evitar
+agt memory:learn -l "Evitar N+1 queries en turnos" -c "PERFORMANCE" -s "Usar inner join con índices"
+```
+
+---
+
 ## 📂 Estructura del Proyecto
 
 ```text

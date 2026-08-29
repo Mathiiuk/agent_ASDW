@@ -16,6 +16,9 @@ import {
   runQualityGates,
   runTaskLoop,
   initProject,
+  buildKnowledgeGraph,
+  recordLesson,
+  queryMemory,
 } from '../src/index.js';
 
 // Inicializamos el programa CLI
@@ -33,8 +36,9 @@ program
  */
 program
   .command('init')
-  .description('Inicializa el ecosistema del agente (.agents/) en el proyecto actual')
+  .description('Inicializa el ecosistema del agente (.agents/) y CI/CD en el proyecto actual')
   .option('--no-cucumber', 'No copiar la configuración de cucumber.json')
+  .option('--no-ci', 'No copiar el workflow de CI/CD para GitHub Actions')
   .action((options) => {
     try {
       const cwd = process.cwd();
@@ -43,6 +47,7 @@ program
       const result = initProject({
         targetDir: cwd,
         copyCucumber: options.cucumber !== false,
+        copyCi: options.ci !== false,
       });
 
       console.log(pc.green(`✔ ¡Proyecto inicializado con éxito!`));
@@ -50,6 +55,10 @@ program
       result.copiedFolders.forEach((f) => console.log(pc.dim(`  📁 .agents/${f}/`)));
       console.log(pc.dim('Estructura de workflow creada:'));
       result.createdWorkflowDirs.forEach((w) => console.log(pc.dim(`  📂 .agents/workflow/${w}/`)));
+
+      if (result.ciCreated) {
+        console.log(pc.cyan(`🚀 Pipeline de CI/CD creado en: ${pc.bold('.github/workflows/ci.yml')}`));
+      }
 
       console.log(pc.yellow('\n👉 Siguiente paso para comenzar tu primera tarea:'));
       console.log(pc.white(`   agt task:new TSK-0001 -t "Mi primera funcionalidad" --type feat\n`));
@@ -264,6 +273,102 @@ program
       }
     } catch (error) {
       console.error(pc.red(`\n✖ Error en bucle autónomo: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: memory:sync (o memory:build)
+ * Escanea el proyecto y reconstruye el grafo de conocimiento Graphify y el contexto condensado.
+ */
+program
+  .command('memory:sync')
+  .alias('memory:build')
+  .description('Escanea el código y reconstruye el grafo de conocimiento (.agents/memory/)')
+  .action(() => {
+    try {
+      console.log(pc.cyan('\n🧠 [Graphify Memory] Sincronizando grafo de conocimiento del proyecto...'));
+      const graph = buildKnowledgeGraph();
+
+      console.log(pc.green('✔ Grafo de memoria sincronizado exitosamente.'));
+      console.log(pc.white(`  📦 Nodos mapeados: ${pc.bold(graph.metrics.totalNodes)}`));
+      console.log(pc.white(`  🔗 Dependencias/Aristas: ${pc.bold(graph.metrics.totalEdges)}`));
+      console.log(pc.white(`  📋 Tareas indexadas: ${pc.bold(graph.metrics.totalTasks)}`));
+      console.log(pc.white(`  💡 Lecciones registradas: ${pc.bold(graph.metrics.totalLessons)}`));
+      console.log(pc.dim('\nArchivos actualizados:'));
+      console.log(pc.dim('  📄 .agents/memory/graph.json'));
+      console.log(pc.dim('  📄 .agents/memory/context.md\n'));
+    } catch (error) {
+      console.error(pc.red(`\n✖ Error al sincronizar memoria: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: memory:query <keyword>
+ * Consulta el grafo de memoria para obtener contexto relevante en pocos tokens.
+ */
+program
+  .command('memory:query <keyword>')
+  .description('Consulta contexto y dependencias relevantes en el grafo de memoria')
+  .action((keyword) => {
+    try {
+      console.log(pc.cyan(`\n🔍 [Graphify Memory] Buscando contexto para: ${pc.bold(keyword)}...\n`));
+      const res = queryMemory(keyword);
+
+      if (res.matchedNodes.length === 0 && res.matchedLessons.length === 0) {
+        console.log(pc.yellow(`No se encontraron coincidencias directas para "${keyword}".\n`));
+        return;
+      }
+
+      if (res.matchedNodes.length > 0) {
+        console.log(pc.green(`📦 Módulos/Nodos Coincidentes (${res.matchedNodes.length}):`));
+        res.matchedNodes.forEach((n) => {
+          console.log(`  - ${pc.bold(n.id)} [${pc.dim(n.type)}]`);
+        });
+        console.log();
+      }
+
+      if (res.matchedLessons.length > 0) {
+        console.log(pc.yellow(`💡 Lecciones y Trampas Conocidas (${res.matchedLessons.length}):`));
+        res.matchedLessons.forEach((l) => {
+          console.log(`  - [${l.category}] ${pc.white(l.lesson)} -> ${pc.dim(l.solution)}`);
+        });
+        console.log();
+      }
+    } catch (error) {
+      console.error(pc.red(`\n✖ Error en consulta de memoria: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: memory:learn
+ * Registra una nueva lección aprendida o trampa evitada en la memoria del proyecto.
+ */
+program
+  .command('memory:learn')
+  .description('Registra una lección o trampa en la memoria persistente del proyecto')
+  .requiredOption('-l, --lesson <lesson>', 'Descripción de la lección o error superado')
+  .option('-c, --category <category>', 'Categoría (BUG_FIX, BEST_PRACTICE, SECURITY, ARCHITECTURE)', 'BUG_FIX')
+  .option('-s, --solution <solution>', 'Solución aplicada para prevenirlo', '')
+  .action((options) => {
+    try {
+      const entry = recordLesson({
+        lesson: options.lesson,
+        category: options.category,
+        solution: options.solution,
+      });
+
+      console.log(pc.green(`\n✔ Lección registrada en memoria: [${entry.id}]`));
+      console.log(pc.white(`  Categoría: ${entry.category}`));
+      console.log(pc.white(`  Lección: ${entry.lesson}`));
+      if (entry.solution) {
+        console.log(pc.dim(`  Solución: ${entry.solution}`));
+      }
+      console.log(pc.dim('\nGrafo de memoria y context.md sincronizados automáticamente.\n'));
+    } catch (error) {
+      console.error(pc.red(`\n✖ Error al registrar lección: ${error.message}\n`));
       process.exit(1);
     }
   });

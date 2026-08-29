@@ -1,0 +1,45 @@
+name: Continuous Delivery & Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: 🚀 Generar Release y Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Clonar Repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 📦 Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+          run_install: false
+
+      - name: 📥 Instalar Dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧪 Verificar Quality Gates antes de Release
+        run: |
+          pnpm test
+          pnpm test:bdd
+
+      - name: 🏷️ Crear Tag y Release en GitHub
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
