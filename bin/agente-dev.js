@@ -15,6 +15,7 @@ import {
   validateManifest,
   runQualityGates,
   runTaskLoop,
+  initProject,
 } from '../src/index.js';
 
 // Inicializamos el programa CLI
@@ -25,6 +26,38 @@ program
   .name('agt')
   .description('CLI del Agente de Workflow Autónomo - Orquestador de Tareas y Ramas Git')
   .version('1.0.0');
+
+/**
+ * COMANDO: init
+ * Inicializa el ecosistema del Agente (.agents/rules, skills, templates, workflow) en el directorio actual.
+ */
+program
+  .command('init')
+  .description('Inicializa el ecosistema del agente (.agents/) en el proyecto actual')
+  .option('--no-cucumber', 'No copiar la configuración de cucumber.json')
+  .action((options) => {
+    try {
+      const cwd = process.cwd();
+      console.log(pc.cyan(`\n🤖 [Agente Workflow] Inicializando ecosistema en: ${pc.bold(cwd)}...`));
+
+      const result = initProject({
+        targetDir: cwd,
+        copyCucumber: options.cucumber !== false,
+      });
+
+      console.log(pc.green(`✔ ¡Proyecto inicializado con éxito!`));
+      console.log(pc.dim('Carpetas configuradas en .agents/:'));
+      result.copiedFolders.forEach((f) => console.log(pc.dim(`  📁 .agents/${f}/`)));
+      console.log(pc.dim('Estructura de workflow creada:'));
+      result.createdWorkflowDirs.forEach((w) => console.log(pc.dim(`  📂 .agents/workflow/${w}/`)));
+
+      console.log(pc.yellow('\n👉 Siguiente paso para comenzar tu primera tarea:'));
+      console.log(pc.white(`   agt task:new TSK-0001 -t "Mi primera funcionalidad" --type feat\n`));
+    } catch (error) {
+      console.error(pc.red(`\n✖ Error al inicializar el proyecto: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
 
 /**
  * COMANDO: task:new <id>

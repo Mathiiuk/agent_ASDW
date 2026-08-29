@@ -61,10 +61,25 @@ agt --help
 
 ## 🛠️ Guía de Uso de la CLI (`agt`)
 
-El CLI del agente automatiza el flujo de trabajo de desarrollo y la gestión de ramas de Git.
+El CLI del agente automatiza el flujo de trabajo de desarrollo, la adopción en proyectos existentes y la gestión de ramas de Git.
 
-### 1. Crear una nueva tarea y su rama de Git
-Genera los 4 artefactos en `docs/workflow/` (`tasks/`, `specs/`, `plans/`, `tests/`) y **crea/conmuta automáticamente a la nueva rama de Git** con formato estandarizado (`<tipo>/<ID>-<slug>`):
+### 1. Inicializar el Agente en cualquier proyecto existente (`agt init`)
+Si tienes un proyecto existente (React, Node, Python, etc.) y deseas gobernarlo con este agente de workflow, sólo ingresa a su carpeta y ejecuta:
+
+```bash
+cd /ruta/hacia/tu-proyecto-existente
+agt init
+```
+
+**¿Qué realiza `agt init`?**
+- Copia la estructura completa de `.agents/` (`rules/`, `skills/`, `templates/`, `workflow/`).
+- Copia la configuración de `cucumber.json` si no existe.
+- Deja el proyecto listo para crear tareas y ejecutar el bucle autónomo.
+
+---
+
+### 2. Crear una nueva tarea y su rama de Git
+Genera los 5 artefactos en `.agents/workflow/` (`tasks/`, `specs/`, `plans/`, `tests/`, `features/`) y **crea/conmuta automáticamente a la nueva rama de Git** con formato estandarizado (`<tipo>/<ID>-<slug>`):
 
 ```bash
 # Ejemplo: Tarea de tipo feature
@@ -83,7 +98,7 @@ agt task:new AGT-0003 -t "Corregir manejo de rutas en Windows" --type fix
 
 ---
 
-### 2. Conmutar a la rama de una tarea existente
+### 3. Conmutar a la rama de una tarea existente
 Calcula el nombre de la rama a partir del manifiesto de la tarea y cambia a ella (creándola si no existía localmente):
 
 ```bash

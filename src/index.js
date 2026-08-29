@@ -9,3 +9,6 @@ export * from './validator.js';
 
 // Exportamos el motor de bucle autónomo y diagnóstico de errores
 export * from './workflow-runner.js';
+
+// Exportamos el inicializador de proyectos
+export * from './init.js';
