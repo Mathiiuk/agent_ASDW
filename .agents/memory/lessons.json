@@ -1,0 +1,9 @@
+[
+  {
+    "id": "LES-1385",
+    "timestamp": "2026-08-29T15:19:31.385Z",
+    "category": "ARCHITECTURE",
+    "lesson": "Asegurar que todas las rutas de artefactos utilicen .agents/workflow/ y .agents/templates/",
+    "solution": "Utilizar las constantes DIRS en src/task-manager.js y MEMORY_PATHS en src/memory.js"
+  }
+]

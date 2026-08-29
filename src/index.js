@@ -12,3 +12,6 @@ export * from './workflow-runner.js';
 
 // Exportamos el inicializador de proyectos
 export * from './init.js';
+
+// Exportamos el sistema de memoria Graphify y base de conocimiento
+export * from './memory.js';
