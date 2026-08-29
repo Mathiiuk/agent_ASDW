@@ -33,8 +33,9 @@ program
  */
 program
   .command('init')
-  .description('Inicializa el ecosistema del agente (.agents/) en el proyecto actual')
+  .description('Inicializa el ecosistema del agente (.agents/) y CI/CD en el proyecto actual')
   .option('--no-cucumber', 'No copiar la configuración de cucumber.json')
+  .option('--no-ci', 'No copiar el workflow de CI/CD para GitHub Actions')
   .action((options) => {
     try {
       const cwd = process.cwd();
@@ -43,6 +44,7 @@ program
       const result = initProject({
         targetDir: cwd,
         copyCucumber: options.cucumber !== false,
+        copyCi: options.ci !== false,
       });
 
       console.log(pc.green(`✔ ¡Proyecto inicializado con éxito!`));
@@ -50,6 +52,10 @@ program
       result.copiedFolders.forEach((f) => console.log(pc.dim(`  📁 .agents/${f}/`)));
       console.log(pc.dim('Estructura de workflow creada:'));
       result.createdWorkflowDirs.forEach((w) => console.log(pc.dim(`  📂 .agents/workflow/${w}/`)));
+
+      if (result.ciCreated) {
+        console.log(pc.cyan(`🚀 Pipeline de CI/CD creado en: ${pc.bold('.github/workflows/ci.yml')}`));
+      }
 
       console.log(pc.yellow('\n👉 Siguiente paso para comenzar tu primera tarea:'));
       console.log(pc.white(`   agt task:new TSK-0001 -t "Mi primera funcionalidad" --type feat\n`));

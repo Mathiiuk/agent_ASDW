@@ -46,9 +46,10 @@ function copyDirRecursive(src, dest) {
  * @param {object} options - Opciones de inicialización
  * @param {string} [options.targetDir=process.cwd()] - Directorio destino donde se inicializará el agente
  * @param {boolean} [options.copyCucumber=true] - Si es true, copia cucumber.json si no existe
- * @returns {{ targetDir: string, copiedFolders: string[], createdWorkflowDirs: string[] }} - Resumen de la inicialización
+ * @param {boolean} [options.copyCi=true] - Si es true, copia .github/workflows/ci.yml si no existe
+ * @returns {{ targetDir: string, copiedFolders: string[], createdWorkflowDirs: string[], ciCreated: boolean }} - Resumen de la inicialización
  */
-export function initProject({ targetDir = process.cwd(), copyCucumber = true } = {}) {
+export function initProject({ targetDir = process.cwd(), copyCucumber = true, copyCi = true } = {}) {
   const sourceAgentsDir = path.join(PACKAGE_ROOT, '.agents');
   const targetAgentsDir = path.join(targetDir, '.agents');
 
@@ -99,10 +100,27 @@ export function initProject({ targetDir = process.cwd(), copyCucumber = true } =
     }
   }
 
+  // 5. Copiamos el pipeline de CI/CD (.github/workflows/ci.yml) si se solicita
+  let ciCreated = false;
+  if (copyCi) {
+    const targetGithubDir = path.join(targetDir, '.github', 'workflows');
+    const targetCiFile = path.join(targetGithubDir, 'ci.yml');
+    const templateCiFile = path.join(sourceAgentsDir, 'templates', 'ci-workflow.yml');
+
+    if (!fs.existsSync(targetCiFile) && fs.existsSync(templateCiFile)) {
+      if (!fs.existsSync(targetGithubDir)) {
+        fs.mkdirSync(targetGithubDir, { recursive: true });
+      }
+      fs.copyFileSync(templateCiFile, targetCiFile);
+      ciCreated = true;
+    }
+  }
+
   // Retornamos el balance de lo copiado e inicializado
   return {
     targetDir,
     copiedFolders,
     createdWorkflowDirs,
+    ciCreated,
   };
 }

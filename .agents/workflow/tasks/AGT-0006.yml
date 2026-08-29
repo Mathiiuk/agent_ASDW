@@ -1,0 +1,38 @@
+id: AGT-0006
+external_ref: ''
+title: >-
+  Implementacion Completa de CI/CD con GitHub Actions y Quality Gates
+  Automatizados
+type: feat
+status: READY_FOR_PR
+priority: medium
+owner: team-agent
+base_branch: main
+scope:
+  project: agente_dev
+  modules: []
+  environments:
+    - local
+requirements:
+  - >-
+    Implementar Implementacion Completa de CI/CD con GitHub Actions y Quality
+    Gates Automatizados
+acceptance_criteria:
+  - >-
+    Criterio de aceptación 1 para Implementacion Completa de CI/CD con GitHub
+    Actions y Quality Gates Automatizados
+requires_approval: false
+quality_gates:
+  lint: false
+  typecheck: false
+  unit_tests: true
+  bdd_tests: true
+  integration_tests: false
+  e2e: false
+  build: false
+  security: false
+  smoke_tests: false
+commands:
+  install: pnpm install
+  unit_tests: pnpm test
+  bdd_tests: pnpm test:bdd
