@@ -1,59 +1,55 @@
 ---
 name: "director-tecnico"
 type: "workflow-orchestrator"
-description: "Regla Maestra de Flujo de Trabajo para Reportalo MVP"
+description: "Regla Maestra de Flujo de Trabajo Autónomo de Bucle Cerrado (Director Técnico)"
 activation:
   global: true
   triggers:
     - "on_task_assigned"
     - "on_chat_start"
+    - "on_goal_requested"
 ---
 
-# Regla Maestra de Flujo de Trabajo: Software Delivery Workflow (DT de Todo)
+# Regla Maestra de Flujo de Trabajo Autónomo (Director Técnico)
 
-Toda tarea o desarrollo en Reportalo debe seguir obligatoriamente este marco metodológico antes, durante y después de escribir código.
+Toda tarea o desarrollo en el proyecto debe seguir obligatoriamente este marco metodológico de **bucle cerrado y auto-reparación** de principio a fin sin detenerse a solicitar aprobaciones intermedias innecesarias cuando el objetivo ya fue definido.
 
 ---
 
-## 1. Stack de Skills Integradas en `.agents/skills/`
+## 1. Stack de Skills y Herramientas Integradas
 
 1. **`software-delivery-workflow` (DT / Director Técnico)**:
-   - Toda feature debe contar con su tarea en `docs/workflow/tasks/`, su especificación en `docs/workflow/specs/`, su plan en `docs/workflow/plans/`, su matriz de pruebas en `docs/workflow/tests/` y su reporte de ejecución en `docs/workflow/executions/`.
-   - La bitácora `resume.md` debe mantenerse siempre sincronizada con el estado real de cada tarea.
-
-2. **`spec-to-plan`**:
-   - Traduce especificaciones funcionales a planes de implementación técnicos rigurosos y accionables paso a paso.
-
-3. **`mobile-pwa-architect`**:
-   - Enfoque Mobile-First estricto, compatibilidad PWA (manifest, service workers, standalone), safe areas (`--sat`, `--sab`), touch targets $\ge 48\times 48\text{px}$, responsive para pantallas de 320px en adelante y compatibilidad con iOS y Android.
-
-4. **`react-patterns` & `ux-ui-design-system`**:
-   - Componentes modulares, desacoplamiento de lógica en Custom Hooks y Contextos, consistencia de diseño con Tailwind CSS y accesibilidad WCAG AA.
-
-5. **`security-guardian` & `auth-implementation-patterns`**:
-   - Arquitectura Zero Trust y Secure by Design.
-   - Jamás exponer secretos o service roles en el frontend.
-   - Limpieza de URLs ante redirecciones OAuth y protección estricta de rutas.
+   - Toda tarea debe tener sus 5 artefactos en `.agents/workflow/`: `tasks/<ID>.yml`, `specs/<ID>.md`, `plans/<ID>.md`, `tests/<ID>.md`, `features/<ID>.feature` y su reporte de cierre en `executions/<ID>.md`.
+2. **`bdd-spec-writer`**:
+   - Redacción de criterios de aceptación ejecutables en Gherkin (inglés con comentarios en español) validados mediante Cucumber (`pnpm test:bdd`).
+3. **`tdd-workflow` & `spec-to-plan`**:
+   - Desarrollo guiado por pruebas unitarias (`pnpm test` con Vitest) con alta cobertura y código documentado en español para aprendizaje.
+4. **`security-guardian` & `auth-implementation-patterns`**:
+   - Arquitectura Zero Trust, sin secretos en repositorios o manifests y permisos estrictos.
 
 ---
 
-## 2. Ciclo de Ejecución de Tareas
+## 2. Ciclo de Ejecución de Tareas y Ramas
 
-1. **Planificación y Especificación:** Validar requisitos y crear artefactos en `docs/workflow/`.
-2. **Desarrollo TDD & Clean Code:** Escribir código comentado en español en cada línea relevante para aprendizaje y trazabilidad.
-3. **Quality Gates:** Ejecutar pruebas automáticas (`npx vitest run`) y build de producción (`npx vite build`).
-4. **Auditoría:** Revisar performance, PWA y seguridad antes de confirmar.
-5. **Git & PR:** Commits semánticos y ramas feature dirigidas a `staging`.
+1. **Creación de Tarea:** Ejecutar `agt task:new <ID> -t "Título" --type <tipo>` para inicializar los 5 artefactos y crear/conmutar a la rama `<tipo>/<ID>-<slug>`.
+2. **Implementación TDD / BDD:** Escribir pruebas y código comentado en español línea por línea.
+3. **Quality Gates Obligatorios:**
+   - `pnpm test` (Unit Tests con Vitest)
+   - `pnpm test:bdd` (Escenarios BDD con Cucumber)
+   - `agt task:verify <ID>`
+4. **Cierre de Tarea:** Generar `.agents/workflow/executions/<ID>.md`, actualizar estado a `READY_FOR_PR` / `DONE` y commitear con mensaje semántico explicativo.
 
 ---
 
-## 3. Directivas de Automatización de Bucle Cerrado
+## 3. Directivas de Automatización de Bucle Cerrado (Sin Pausas de Aprobación)
 
-Cuando se te asigne un requerimiento, ejecuta estas acciones secuencialmente sin detenerte a pedir confirmación:
-1. **Inicialización:** Carga la instrucción, lee las habilidades de `.agents/skills/` y genera los archivos iniciales en `docs/workflow/tasks/` y `specs/`.
-2. **Encadenamiento:** Invoca automáticamente `spec-to-plan` para escribir el plan de desarrollo y mapea la matriz de pruebas. Actualiza `resume.md`.
-3. **Codificación y Calidad:** Escribe el código bajo los patrones definidos. Acto seguido, ejecuta usando la terminal del entorno de ejecución:
-   - `npx vitest run`
-   - `npx vite build`
-4. **Auto-Corrección (Self-Healing):** Si los comandos de la terminal devuelven errores, lee los logs, corrige el código fuente de forma autónoma y vuelve a ejecutar los comandos de calidad hasta que compilen con éxito.
-5. **Cierre:** Genera el reporte final en `docs/workflow/executions/` y notifica al usuario la finalización del flujo.
+Cuando el usuario asigne un requerimiento, el agente debe ejecutar las siguientes acciones de forma **ininterrumpida**:
+
+1. **Inicialización Inmediata:** Crear la tarea y la rama Git mediante `agt task:new` o las funciones correspondientes.
+2. **Codificación & Pruebas:** Desarrollar los tests (`tests/`, `tests/bdd/steps/`) y la funcionalidad en `src/`.
+3. **Ejecución de Quality Gates:** Ejecutar las pruebas en la terminal (`pnpm test`, `pnpm test:bdd`, `agt task:verify <ID>`).
+4. **Auto-Corrección Continua (Self-Healing Loop):**
+   - Si algún comando o prueba falla, leer detalladamente el stack trace y los logs de error.
+   - Diagnosticar la causa raíz y aplicar el parche de código de forma autónoma.
+   - Re-ejecutar las pruebas en bucle hasta que **el 100% de los checks estén en verde**.
+5. **Cierre y Notificación:** Crear el reporte de ejecución en `.agents/workflow/executions/<ID>.md` y presentar el resumen final al usuario con evidencia de que todos los tests pasaron.

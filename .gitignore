@@ -1,0 +1,41 @@
+# Dependencias de paquetes
+node_modules/
+.pnpm-store/
+
+# Logs y depuración
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Cobertura de pruebas
+coverage/
+*.lcov
+
+# Directorios de compilación / distribución
+dist/
+build/
+.cache/
+
+# Archivos del sistema y del entorno
+.env
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
+
+# Configuración de editores
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

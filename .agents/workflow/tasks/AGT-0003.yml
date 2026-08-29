@@ -1,0 +1,49 @@
+id: AGT-0003
+external_ref: ''
+title: Motor de Bucle Autonomo y Auto-Correccion Self-Healing
+type: feat
+status: READY_FOR_PR
+priority: high
+owner: team-agent
+base_branch: main
+scope:
+  project: agente_dev
+  modules:
+    - workflow-runner
+    - self-healing
+    - cli
+    - rules
+  environments:
+    - local
+requirements:
+  - >-
+    Actualizar regla maestra en .agents/rules/master-workflow.md para ejecución
+    continua sin pausas
+  - >-
+    Implementar src/workflow-runner.js con soporte para bucle cerrado de
+    reintentos y diagnóstico
+  - Añadir comando agt task:loop / task:run a la CLI con reporte automático
+acceptance_criteria:
+  - >-
+    El comando agt task:loop ejecuta los gates en bucle, clasifica fallos y
+    genera docs/workflow/executions/<ID>.md
+  - >-
+    La regla maestra instruye al agente a resolver el ciclo completo de forma
+    ininterrumpida
+  - 100% de los tests unitarios y BDD pasan en verde
+requires_approval: false
+quality_gates:
+  lint: false
+  typecheck: false
+  unit_tests: true
+  bdd_tests: true
+  integration_tests: false
+  e2e: false
+  build: false
+  security: false
+  smoke_tests: true
+commands:
+  install: pnpm install
+  unit_tests: pnpm test
+  bdd_tests: pnpm test:bdd
+  smoke_tests: node ./bin/agente-dev.js --help
