@@ -5,5 +5,12 @@
     "category": "ARCHITECTURE",
     "lesson": "Asegurar que todas las rutas de artefactos utilicen .agents/workflow/ y .agents/templates/",
     "solution": "Utilizar las constantes DIRS en src/task-manager.js y MEMORY_PATHS en src/memory.js"
+  },
+  {
+    "id": "LES-2001",
+    "timestamp": "2026-08-29T15:24:52.001Z",
+    "category": "CI_CD",
+    "lesson": "pnpm v11 requiere Node.js >= 22.13.0 por modulo nativo node:sqlite. No usar Node 20 en GitHub Actions.",
+    "solution": "Configurar actions/setup-node@v4 con node-version 22 o 24 antes de pnpm/action-setup@v4 con run_install false."
   }
 ]

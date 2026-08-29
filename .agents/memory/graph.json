@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-08-29T15:19:31.449Z",
+  "updatedAt": "2026-08-29T15:24:52.032Z",
   "project": "agente_dev",
   "metrics": {
-    "totalNodes": 22,
-    "totalEdges": 58,
-    "totalTasks": 7,
-    "totalLessons": 1
+    "totalNodes": 23,
+    "totalEdges": 59,
+    "totalTasks": 8,
+    "totalLessons": 2
   },
   "nodes": [
     {
@@ -239,8 +239,15 @@
       "id": "task:AGT-0007",
       "label": "AGT-0007: Implementacion de Memoria Graphify para Ahorro de Tokens y Aprendizaje de Errores",
       "type": "task",
-      "status": "PLANNED",
+      "status": "READY_FOR_PR",
       "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0008",
+      "label": "AGT-0008: Fix compatibilidad CI CD pnpm v11 con Node 22 y 24",
+      "type": "task",
+      "status": "PLANNED",
+      "taskType": "fix"
     }
   ],
   "edges": [
@@ -533,6 +540,11 @@
       "from": "task:AGT-0007",
       "to": ".agents/workflow/tasks/AGT-0007.yml",
       "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0008",
+      "to": ".agents/workflow/tasks/AGT-0008.yml",
+      "relation": "manifested_by"
     }
   ],
   "lessons": [
@@ -542,6 +554,13 @@
       "category": "ARCHITECTURE",
       "lesson": "Asegurar que todas las rutas de artefactos utilicen .agents/workflow/ y .agents/templates/",
       "solution": "Utilizar las constantes DIRS en src/task-manager.js y MEMORY_PATHS en src/memory.js"
+    },
+    {
+      "id": "LES-2001",
+      "timestamp": "2026-08-29T15:24:52.001Z",
+      "category": "CI_CD",
+      "lesson": "pnpm v11 requiere Node.js >= 22.13.0 por modulo nativo node:sqlite. No usar Node 20 en GitHub Actions.",
+      "solution": "Configurar actions/setup-node@v4 con node-version 22 o 24 antes de pnpm/action-setup@v4 con run_install false."
     }
   ]
 }
