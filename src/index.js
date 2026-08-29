@@ -6,3 +6,6 @@ export * from './task-manager.js';
 
 // Exportamos las validaciones y ejecutor de quality gates
 export * from './validator.js';
+
+// Exportamos el motor de bucle autónomo y diagnóstico de errores
+export * from './workflow-runner.js';

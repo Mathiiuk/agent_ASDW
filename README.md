@@ -101,7 +101,20 @@ agt task:verify AGT-0001
 
 ---
 
-### 4. Listar todas las tareas del workflow
+### 4. Ejecutar el Bucle Autónomo de Auto-Corrección (Self-Healing Loop)
+Ejecuta el ciclo cerrado completo: evalúa quality gates, diagnostica causas de fallos si los hay, reintenta hasta el límite configurado y genera automáticamente el reporte final en `docs/workflow/executions/<ID>.md`:
+
+```bash
+# Ejecutar bucle con 3 reintentos por defecto
+agt task:loop AGT-0003
+
+# O con alias y límite personalizado
+agt task:run AGT-0003 --max-retries 5
+```
+
+---
+
+### 5. Listar todas las tareas del workflow
 Muestra el listado de todas las tareas registradas en el proyecto y su estado actual:
 
 ```bash
@@ -110,7 +123,7 @@ agt task:list
 
 ---
 
-### 5. Consultar o actualizar el estado de una tarea
+### 6. Consultar o actualizar el estado de una tarea
 ```bash
 # Consultar estado actual
 agt task:status AGT-0001

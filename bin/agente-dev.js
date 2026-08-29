@@ -14,6 +14,7 @@ import {
   checkoutBranch,
   validateManifest,
   runQualityGates,
+  runTaskLoop,
 } from '../src/index.js';
 
 // Inicializamos el programa CLI
@@ -189,6 +190,47 @@ program
       }
     } catch (error) {
       console.error(pc.red(`\n✖ Error al procesar estado: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: task:loop <id> (o task:run)
+ * Ejecuta el bucle cerrado autónomo con diagnóstico de fallos y generación de reporte.
+ */
+program
+  .command('task:loop <id>')
+  .alias('task:run')
+  .description('Ejecuta el bucle cerrado autónomo con diagnóstico y reporte final')
+  .option('-m, --max-retries <n>', 'Número máximo de iteraciones de reintento', '3')
+  .action(async (id, options) => {
+    try {
+      const maxRetries = parseInt(options.maxRetries, 10) || 3;
+      console.log(pc.cyan(`\n🔄 [Self-Healing Loop] Iniciando bucle para tarea: ${pc.bold(id)} (Máx. reintentos: ${maxRetries})...`));
+
+      const loopResult = await runTaskLoop({
+        id,
+        maxRetries,
+      });
+
+      console.log(pc.dim(`\nReporte generado en: ${loopResult.reportPath}`));
+
+      if (loopResult.success) {
+        console.log(pc.green(`\n🎉 [ÉXITO] Todos los Quality Gates pasaron en ${loopResult.iterations} iteración(es).`));
+        console.log(pc.yellow(`Estado de ${pc.bold(id)} actualizado a: READY_FOR_PR\n`));
+      } else {
+        console.log(pc.red(`\n⚠️ [FALLO] No se superaron los Quality Gates tras ${loopResult.iterations} iteración(es).`));
+        if (loopResult.diagnostics.length > 0) {
+          console.log(pc.yellow('\nDiagnóstico de causas:'));
+          loopResult.diagnostics.forEach((d) => {
+            console.log(pc.red(`  - [${d.category}] Gate "${d.gate}": ${pc.white(d.suggestion)}`));
+          });
+        }
+        console.log();
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(pc.red(`\n✖ Error en bucle autónomo: ${error.message}\n`));
       process.exit(1);
     }
   });
