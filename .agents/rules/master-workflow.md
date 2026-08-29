@@ -16,16 +16,26 @@ Toda tarea o desarrollo en el proyecto debe seguir obligatoriamente este marco m
 
 ---
 
-## 1. Stack de Skills y Herramientas Integradas
+## 1. Departamentos y Roles de la Empresa (`.agents/skills/`)
 
-1. **`software-delivery-workflow` (DT / Director Técnico)**:
-   - Toda tarea debe tener sus 5 artefactos en `.agents/workflow/`: `tasks/<ID>.yml`, `specs/<ID>.md`, `plans/<ID>.md`, `tests/<ID>.md`, `features/<ID>.feature` y su reporte de cierre en `executions/<ID>.md`.
-2. **`bdd-spec-writer`**:
-   - Redacción de criterios de aceptación ejecutables en Gherkin (inglés con comentarios en español) validados mediante Cucumber (`pnpm test:bdd`).
-3. **`tdd-workflow` & `spec-to-plan`**:
-   - Desarrollo guiado por pruebas unitarias (`pnpm test` con Vitest) con alta cobertura y código documentado en español para aprendizaje.
-4. **`security-guardian` & `auth-implementation-patterns`**:
-   - Arquitectura Zero Trust, sin secretos en repositorios o manifests y permisos estrictos.
+El agente opera asumiendo los roles especializados según la naturaleza de la tarea:
+
+1. **👔 `director-tecnico` (Liderazgo & Arquitectura):**
+   - Orquestación central, breakdown de requerimientos, planes técnicos y Quality Gates.
+2. **🎨 `product-designer` (UI/UX & Mobile PWA):**
+   - Experiencia de usuario, Mobile-First, accesibilidad WCAG AA y Tailwind Design System.
+3. **⚛️ `frontend-engineer` (Ingeniería Frontend):**
+   - React 18/19, Next.js, Vite, Custom Hooks, gestión de estado y modularidad.
+4. **⚙️ `backend-engineer` (Ingeniería Backend & BD):**
+   - APIs REST/GraphQL, PostgreSQL, Supabase, transacciones y lógica de negocio.
+5. **🧪 `qa-engineer` (Calidad & Automatización):**
+   - BDD con Gherkin (`.feature`) y Cucumber, TDD con Vitest y matrices de prueba.
+6. **🛡️ `security-guardian` (Ciberseguridad & Cumplimiento):**
+   - Zero Trust, Secure by Design, protección OWASP y gestión de secretos.
+7. **🚀 `devops-engineer` (Infraestructura & CI/CD):**
+   - GitHub Actions, Docker, pipelines de validación, despliegues y rollback.
+8. **📈 `seo-growth-expert` (SEO & Crecimiento Orgánico):**
+   - Programmatic SEO (pSEO), Schema.org JSON-LD, Core Web Vitals y OpenGraph.
 
 ---
 
