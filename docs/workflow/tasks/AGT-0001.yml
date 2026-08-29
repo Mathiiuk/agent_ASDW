@@ -1,0 +1,43 @@
+id: AGT-0001
+external_ref: ""
+title: "CLI del Agente de Workflow y Automatización de Ramas Git"
+type: feat
+status: READY_FOR_PR
+priority: high
+owner: team-agent
+base_branch: main
+
+scope:
+  project: agente_dev
+  modules: [cli, git, workflow-engine]
+  environments: [local]
+
+requirements:
+  - "Configurar el proyecto como paquete Node.js ejecutable para instalar vía CLI (agt / agente-dev)"
+  - "Automatizar la creación y cambio a nueva rama Git con formato <type>/<TASK-ID>-<slug> al crear tareas"
+  - "Crear generador de artefactos de workflow (tasks, specs, plans, tests)"
+  - "Añadir comandos de verificación de quality gates (lint, tests, DoD)"
+
+acceptance_criteria:
+  - "El comando CLI se puede invocar con 'agt' o 'agente-dev'"
+  - "agt task:new <ID> --title <titulo> --type <tipo> genera los 4 archivos en docs/workflow/ y crea la rama Git"
+  - "Si hay cambios sucios o conflicto, el CLI previene acciones destructivas y notifica claramente"
+  - "Suite de pruebas unitarias pasa al 100%"
+
+requires_approval: false
+
+quality_gates:
+  lint: false
+  typecheck: false
+  unit_tests: true
+  integration_tests: true
+  e2e: false
+  build: false
+  security: false
+  smoke_tests: true
+
+commands:
+  install: "pnpm install"
+  unit_tests: "pnpm test"
+  integration_tests: "pnpm test"
+  smoke_tests: "node ./bin/agente-dev.js --help"

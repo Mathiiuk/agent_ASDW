@@ -1,0 +1,36 @@
+{
+  "name": "agente-dev",
+  "version": "1.0.0",
+  "description": "CLI y Orquestador de Flujo de Trabajo Autónomo de Entrega de Software",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "agente-dev": "./bin/agente-dev.js",
+    "agt": "./bin/agente-dev.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:bdd": "cucumber-js",
+    "cli": "node ./bin/agente-dev.js"
+  },
+  "keywords": [
+    "agent",
+    "workflow",
+    "git",
+    "automation",
+    "tdd",
+    "quality-gates"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0",
+    "picocolors": "^1.1.0"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^13.2.1",
+    "vitest": "^2.1.0"
+  }
+}

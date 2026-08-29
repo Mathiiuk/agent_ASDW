@@ -1,0 +1,37 @@
+id: AGT-0002
+external_ref: ''
+title: Integracion de Motor BDD con Gherkin y Cucumber
+type: feat
+status: READY_FOR_PR
+priority: high
+owner: team-agent
+base_branch: main
+scope:
+  project: agente_dev
+  modules: [bdd, cucumber, task-manager, workflow-engine]
+  environments:
+    - local
+requirements:
+  - Integrar @cucumber/cucumber en el stack del agente con pnpm
+  - Añadir soporte para plantillas y generación de archivos .feature en Gherkin
+  - Habilitar Quality Gate bdd_tests en la verificación automática de tareas
+acceptance_criteria:
+  - Cucumber ejecuta archivos .feature con pnpm test:bdd y pasa al 100%
+  - agt task:new genera automáticamente docs/workflow/features/<ID>.feature
+  - Quality Gate bdd_tests verifica los escenarios de comportamiento
+requires_approval: false
+quality_gates:
+  lint: false
+  typecheck: false
+  unit_tests: true
+  bdd_tests: true
+  integration_tests: false
+  e2e: false
+  build: false
+  security: false
+  smoke_tests: true
+commands:
+  install: pnpm install
+  unit_tests: pnpm test
+  bdd_tests: pnpm test:bdd
+  smoke_tests: node ./bin/agente-dev.js --help
