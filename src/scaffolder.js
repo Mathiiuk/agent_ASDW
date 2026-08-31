@@ -54,7 +54,7 @@ export function generateBddScaffold(taskId, projectRoot = process.cwd()) {
   }
 
   // Generamos el código JS del esqueleto
-  let jsCode = `import { Given, When, Then } from '@cucumber/cucumber';\nimport { expect } from 'vitest';\n\n`;
+  let jsCode = `import { Given, When, Then } from '@cucumber/cucumber';\nimport assert from 'node:assert';\n\n`;
 
   for (const step of steps) {
     // Usamos keyword base (Given, When, Then) en código real
