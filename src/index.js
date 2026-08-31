@@ -15,3 +15,12 @@ export * from './init.js';
 
 // Exportamos el sistema de memoria Graphify y base de conocimiento
 export * from './memory.js';
+
+// Exportamos el gestor de releases y changelog
+export * from './release-manager.js';
+
+// Exportamos el generador de código BDD
+export * from './scaffolder.js';
+
+// Exportamos el Servidor MCP nativo
+export * from './mcp-server.js';

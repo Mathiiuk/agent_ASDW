@@ -116,11 +116,146 @@ export function initProject({ targetDir = process.cwd(), copyCucumber = true, co
     }
   }
 
+  // 6. Integración NATIVA Universal (Antigravity, Cursor, Windsurf, Cline y Genérico)
+  const aiInstructionContent = `# Workspace AI Rules
+
+Estás operando en un entorno de desarrollo estructurado para Agentes de IA.
+
+> [!IMPORTANT]
+> 1. Debes seguir ESTRICTAMENTE las directrices del flujo de trabajo definidas en:
+>    **[.agents/rules/master-workflow.md](.agents/rules/master-workflow.md)**
+> 2. Antes de realizar cambios importantes, DEBES leer el contexto del proyecto en:
+>    **[.agents/memory/context.md](.agents/memory/context.md)**
+
+Para ejecutar tareas, asume los roles especializados (Frontend, Backend, DevOps, etc.) definidos en la carpeta \`.agents/skills/\`.
+`;
+
+  // Archivos clave leídos por los IDEs y extensiones más populares
+  const aiIntegrationFiles = [
+    'AGENTS.md',        // Antigravity 2.0
+    '.cursorrules',     // Cursor IDE
+    '.windsurfrules',   // Windsurf IDE
+    '.clinerules',      // Cline / Roo Code (VS Code)
+    'AI.md'             // Genérico (para adjuntar a ChatGPT, Claude, etc.)
+  ];
+
+  for (const filename of aiIntegrationFiles) {
+    const targetFile = path.join(targetDir, filename);
+    if (!fs.existsSync(targetFile)) {
+      fs.writeFileSync(targetFile, aiInstructionContent, 'utf-8');
+    }
+  }
+  // 7. Integración con Scripts de package.json (Aparecen en la sidebar del IDE)
+  let packageScriptsAdded = false;
+  const targetPackageJson = path.join(targetDir, 'package.json');
+  if (fs.existsSync(targetPackageJson)) {
+    try {
+      const pkgData = fs.readFileSync(targetPackageJson, 'utf-8');
+      const pkg = JSON.parse(pkgData);
+      pkg.scripts = pkg.scripts || {};
+      
+      const agentScripts = {
+        "agt:task": "agt task:new",
+        "agt:loop": "agt task:loop",
+        "agt:memory": "agt memory:sync"
+      };
+
+      for (const [key, val] of Object.entries(agentScripts)) {
+        if (!pkg.scripts[key]) {
+          pkg.scripts[key] = val;
+          packageScriptsAdded = true;
+        }
+      }
+
+      if (packageScriptsAdded) {
+        fs.writeFileSync(targetPackageJson, JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
+      }
+    } catch (e) {
+      // Ignorar de forma segura si package.json está malformado
+    }
+  }
+
+  // 8. Integración con VS Code (Command Palette / Tasks)
+  let vscodeTasksCreated = false;
+  const vscodeDir = path.join(targetDir, '.vscode');
+  const tasksJsonPath = path.join(vscodeDir, 'tasks.json');
+  
+  if (!fs.existsSync(vscodeDir)) {
+    fs.mkdirSync(vscodeDir, { recursive: true });
+  }
+  
+  if (!fs.existsSync(tasksJsonPath)) {
+    const tasksConfig = {
+      "version": "2.0.0",
+      "tasks": [
+        { "label": "🤖 Agente: Nueva Tarea", "type": "shell", "command": "agt task:new", "problemMatcher": [] },
+        { "label": "🤖 Agente: Bucle Autónomo", "type": "shell", "command": "agt task:loop", "problemMatcher": [] },
+        { "label": "🤖 Agente: Sincronizar Memoria", "type": "shell", "command": "agt memory:sync", "problemMatcher": [] }
+      ]
+    };
+    fs.writeFileSync(tasksJsonPath, JSON.stringify(tasksConfig, null, 2) + '\n', 'utf-8');
+    vscodeTasksCreated = true;
+  }
+  // 9. Git Pre-commit Hook (El Guardián)
+  let gitHookCreated = false;
+  const gitHooksDir = path.join(targetDir, '.git', 'hooks');
+  
+  if (fs.existsSync(path.join(targetDir, '.git'))) {
+    if (!fs.existsSync(gitHooksDir)) {
+      fs.mkdirSync(gitHooksDir, { recursive: true });
+    }
+    
+    const preCommitPath = path.join(gitHooksDir, 'pre-commit');
+    if (!fs.existsSync(preCommitPath)) {
+      const preCommitScript = `#!/bin/sh
+# 🤖 Agente Dev - Guardian Pre-commit Hook
+# Este hook verifica automáticamente si estás en la rama de una tarea
+# y bloquea el commit si los Quality Gates fallan.
+
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+TASK_ID=$(echo "$BRANCH_NAME" | grep -oE 'AGT-[0-9]+' || echo "")
+
+if [ ! -z "$TASK_ID" ]; then
+  echo "🤖 [Agente Dev] Tarea detectada: $TASK_ID. Ejecutando Quality Gates antes del commit..."
+  
+  if command -v agt >/dev/null 2>&1; then
+    agt task:verify "$TASK_ID"
+  elif command -v npx >/dev/null 2>&1; then
+    npx agt task:verify "$TASK_ID"
+  else
+    echo "⚠️ [Agente Dev] No se encontró el CLI 'agt' o 'npx'. Saltando verificación."
+    exit 0
+  fi
+  
+  if [ $? -ne 0 ]; then
+    echo "❌ [Agente Dev] Quality Gates fallidos. Commit abortado."
+    echo "💡 Ejecuta 'agt task:loop $TASK_ID' para diagnosticar y auto-reparar."
+    exit 1
+  fi
+  
+  echo "✅ [Agente Dev] Quality Gates verificados."
+fi
+
+exit 0
+`;
+      fs.writeFileSync(preCommitPath, preCommitScript, 'utf-8');
+      try {
+        fs.chmodSync(preCommitPath, 0o755);
+      } catch (e) {
+        // Ignorar en sistemas que no soporten chmod (como Windows puro)
+      }
+      gitHookCreated = true;
+    }
+  }
+
   // Retornamos el balance de lo copiado e inicializado
   return {
     targetDir,
     copiedFolders,
     createdWorkflowDirs,
     ciCreated,
+    packageScriptsAdded,
+    vscodeTasksCreated,
+    gitHookCreated
   };
 }
