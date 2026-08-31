@@ -12,5 +12,12 @@
     "category": "CI_CD",
     "lesson": "pnpm v11 requiere Node.js >= 22.13.0 por modulo nativo node:sqlite. No usar Node 20 en GitHub Actions.",
     "solution": "Configurar actions/setup-node@v4 con node-version 22 o 24 antes de pnpm/action-setup@v4 con run_install false."
+  },
+  {
+    "id": "LES-1335",
+    "timestamp": "2026-08-29T15:26:51.336Z",
+    "category": "WORKFLOW",
+    "lesson": "No crear ramas nuevas para fixes o ajustes menores; commitear directamente en la rama activa con mensajes semánticos o usar --no-branch.",
+    "solution": "Mantenerse en la rama actual y realizar git commit -m 'fix(...)'"
   }
 ]

@@ -72,9 +72,11 @@ agt init
 ```
 
 **¿Qué realiza `agt init`?**
-- Copia la estructura completa de `.agents/` (`rules/`, `skills/`, `templates/`, `workflow/`).
-- Copia la configuración de `cucumber.json` si no existe.
-- Deja el proyecto listo para crear tareas y ejecutar el bucle autónomo.
+- **Arquitectura Base**: Copia la estructura encapsulada en `.agents/` (`rules/`, `skills/`, `templates/`, `workflow/`).
+- **Pipeline CI/CD**: Añade configuraciones de BDD (`cucumber.json`) y GitHub Actions listas para validaciones automáticas.
+- **🚀 [NUEVO] Integración Universal de IA**: Genera automáticamente en la raíz los archivos de sistema para tu IDE favorito (`AGENTS.md` para Antigravity 2.0, `.cursorrules` para Cursor, `.windsurfrules` para Windsurf, `.clinerules` para Cline/VS Code y `AI.md` genérico). Todos redirigiendo a la misma regla maestra.
+- **🚀 [NUEVO] Inyección de Comandos en tu IDE**: Añade scripts directos (`agt:task`, `agt:loop`, `agt:memory`) en el `package.json` para que aparezcan clickeables en la barra lateral de tu IDE, y crea las tareas nativas (Command Palette) en `.vscode/tasks.json`.
+- Deja el proyecto completamente orquestado y listo para desarrollar.
 
 ---
 
@@ -163,6 +165,78 @@ agt memory:query "auth"
 # Registrar una lección aprendida o trampa a evitar
 agt memory:learn -l "Evitar N+1 queries en turnos" -c "PERFORMANCE" -s "Usar inner join con índices"
 ```
+
+---
+
+### 8. Gestor de Releases y Auto-Changelog (`agt release`)
+Cuando finalices un sprint o un hito, consolida tus tareas completadas (`status: DONE`) en una nueva versión limpia y profesional.
+
+```bash
+# Generar la versión v1.0.0
+agt release v1.0.0
+```
+
+**¿Qué sucede automáticamente?**
+1. Escanea las tareas finalizadas y las agrupa por categoría (🚀 Features, 🐛 Fixes, 📦 Mantenimiento).
+2. Genera y actualiza tu archivo `CHANGELOG.md` en la raíz del proyecto.
+3. Actualiza el número de versión directamente en tu `package.json`.
+4. Etiqueta los manifiestos procesados (`released_in: v1.0.0`) para no duplicarlos en la próxima versión.
+
+---
+
+### 9. Auto-Scaffolding BDD (`agt test:scaffold`)
+Acelera el desarrollo guiado por comportamiento (TDD/BDD). El CLI lee tus especificaciones en lenguaje natural y te genera el esqueleto de código (Step Definitions).
+
+```bash
+agt test:scaffold AGT-0001
+```
+
+**Ejemplo de uso:**
+Si tu archivo `.agents/workflow/features/AGT-0001.feature` contiene:
+> *Given un usuario en la base de datos*
+
+El CLI generará el archivo JS listo para programar en `tests/bdd/steps/AGT-0001.steps.js`:
+```javascript
+import { Given, When, Then } from '@cucumber/cucumber';
+import { expect } from 'vitest';
+
+Given('un usuario en la base de datos', async function () {
+  // TODO: Implementar el paso
+});
+```
+
+---
+
+### 10. Servidor MCP para Inteligencia Artificial (`agt mcp`)
+**Model Context Protocol (MCP)** permite que IDEs modernos (Antigravity 2.0, Cursor, Claude Desktop, Cline) consuman las herramientas de tu proyecto de manera nativa (sin interactuar con el texto de la consola).
+
+```bash
+# Iniciar el servidor (Usa la entrada/salida estándar stdio)
+agt mcp
+```
+
+**¿Cómo conectarlo a tu IDE de IA (Ej. Cursor o Claude Desktop)?**
+Agrega la siguiente configuración en tu panel de herramientas MCP o en tu archivo `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "agente-dev": {
+      "command": "npx",
+      "args": ["agt", "mcp"]
+    }
+  }
+}
+```
+*Impacto:* Tu agente de IA obtendrá acceso nativo para ejecutar `list_active_tasks` y `query_graphify_memory` como botones interactivos directos, comprendiendo tu proyecto infinitamente mejor.
+
+---
+
+### 11. El Guardián Automático (Git Pre-Commit Hook)
+No requiere configuración manual. Al ejecutar `agt init`, el framework instala un hook inteligente en tu sistema (`.git/hooks/pre-commit`).
+
+Si estás trabajando en la rama de una tarea (ej. `feat/AGT-0021`) e intentas hacer `git commit`, el guardián congelará el commit y ejecutará los Quality Gates (`agt task:verify AGT-0021`). 
+- **Si todo pasa 🟢:** El commit se aprueba.
+- **Si hay errores 🔴:** El commit **es bloqueado** instantáneamente, y te pedirá ejecutar el bucle de auto-corrección (`agt task:loop`) garantizando que jamás subas código roto al repositorio.
 
 ---
 

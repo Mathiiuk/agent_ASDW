@@ -39,15 +39,18 @@ El agente opera asumiendo los roles especializados según la naturaleza de la ta
 
 ---
 
-## 2. Ciclo de Ejecución de Tareas y Ramas
+## 2. Ciclo de Ejecución de Tareas y Gestión de Ramas
 
-1. **Creación de Tarea:** Ejecutar `agt task:new <ID> -t "Título" --type <tipo>` para inicializar los 5 artefactos y crear/conmutar a la rama `<tipo>/<ID>-<slug>`.
-2. **Implementación TDD / BDD:** Escribir pruebas y código comentado en español línea por línea.
-3. **Quality Gates Obligatorios:**
+1. **Nuevas Funcionalidades / Módulos (`feat`, `refactor`):**
+   - Crear tarea y conmutar a rama dedicada: `agt task:new <ID> -t "Título" --type feat`.
+2. **Correcciones, Fixes de CI/CD y Ajustes Menores (`fix`, `docs`, `chore`):**
+   - **NO crear una rama nueva.** Mantenerse en la rama activa de trabajo (o en `main`/`staging`) y enviar la corrección mediante commits semánticos directos (`git commit -m "fix(...)"` o `agt task:new <ID> -t "..." --no-branch`).
+3. **Implementación TDD / BDD:** Escribir pruebas y código comentado en español línea por línea.
+4. **Quality Gates Obligatorios:**
    - `pnpm test` (Unit Tests con Vitest)
    - `pnpm test:bdd` (Escenarios BDD con Cucumber)
    - `agt task:verify <ID>`
-4. **Cierre de Tarea:** Generar `.agents/workflow/executions/<ID>.md`, actualizar estado a `READY_FOR_PR` / `DONE` y commitear con mensaje semántico explicativo.
+5. **Cierre de Tarea:** Generar `.agents/workflow/executions/<ID>.md`, actualizar estado a `READY_FOR_PR` / `DONE` y commitear con mensaje semántico explicativo.
 
 ---
 

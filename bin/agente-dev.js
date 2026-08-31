@@ -19,6 +19,9 @@ import {
   buildKnowledgeGraph,
   recordLesson,
   queryMemory,
+  generateRelease,
+  generateBddScaffold,
+  startMcpServer,
 } from '../src/index.js';
 
 // Inicializamos el programa CLI
@@ -369,6 +372,80 @@ program
       console.log(pc.dim('\nGrafo de memoria y context.md sincronizados automáticamente.\n'));
     } catch (error) {
       console.error(pc.red(`\n✖ Error al registrar lección: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: release <version>
+ * Analiza tareas completadas y genera un CHANGELOG.md automático.
+ */
+program
+  .command('release <version>')
+  .description('Genera una release, actualizando CHANGELOG.md y package.json')
+  .action((version) => {
+    try {
+      console.log(pc.cyan(`\n📦 Generando Release: ${pc.bold(version)}...`));
+      const res = generateRelease(version);
+
+      if (!res.success) {
+        console.log(pc.yellow(`\n⚠️  ${res.message}\n`));
+        return;
+      }
+
+      console.log(pc.green(`\n✔ Release ${pc.bold(res.version)} completado.`));
+      console.log(pc.white(`  Tareas procesadas: ${res.tasksCount}`));
+      console.log(pc.dim(`  Changelog actualizado en: ${res.changelogPath}`));
+      if (res.pkgUpdated) {
+        console.log(pc.dim(`  package.json actualizado a la versión ${res.version}`));
+      }
+      console.log();
+    } catch (error) {
+      console.error(pc.red(`\n✖ Error al generar release: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: test:scaffold <id>
+ * Genera el código base de Step Definitions (Cucumber) a partir de un .feature.
+ */
+program
+  .command('test:scaffold <id>')
+  .description('Genera el código base de Cucumber (JS) desde un archivo .feature')
+  .action((id) => {
+    try {
+      console.log(pc.cyan(`\n🔨 Generando Scaffold BDD para: ${pc.bold(id)}...`));
+      const res = generateBddScaffold(id);
+
+      if (!res.success) {
+        console.log(pc.yellow(`\n⚠️  ${res.message}\n`));
+        return;
+      }
+
+      console.log(pc.green(`\n✔ Scaffold generado exitosamente.`));
+      console.log(pc.white(`  Pasos extraídos: ${res.stepsCount}`));
+      console.log(pc.dim(`  Archivo creado en: ${res.filePath}\n`));
+    } catch (error) {
+      console.error(pc.red(`\n✖ Error al generar scaffolding: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: mcp
+ * Inicia el servidor MCP nativo (Protocolo JSON-RPC por stdio).
+ * IDEs y clientes de IA (Cursor, Antigravity) conectan a este proceso.
+ */
+program
+  .command('mcp')
+  .description('Inicia el Servidor Model Context Protocol (MCP) por stdio')
+  .action(async () => {
+    try {
+      // Importante: No imprimir nada por console.log/console.error usando stdout,
+      // ya que stdio se usa exclusivamente para el protocolo JSON-RPC.
+      await startMcpServer();
+    } catch (error) {
       process.exit(1);
     }
   });
