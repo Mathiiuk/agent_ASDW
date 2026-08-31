@@ -93,7 +93,21 @@ export function isGitRepo(cwd = process.cwd()) {
  */
 export function getCurrentBranch(cwd = process.cwd()) {
   // Consultamos la rama actual mediante git branch --show-current
-  return runGit('git branch --show-current', cwd);
+  let branch = runGit('git branch --show-current', cwd);
+  
+  // Fallback para entornos CI en "detached HEAD" (ej. GitHub Actions)
+  if (!branch) {
+    try {
+      branch = runGit('git rev-parse --abbrev-ref HEAD', cwd);
+      if (branch === 'HEAD') {
+        // Sigue detached, usar variable de entorno de GitHub o short hash
+        branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || runGit('git rev-parse --short HEAD', cwd);
+      }
+    } catch {
+      branch = '';
+    }
+  }
+  return branch;
 }
 
 /**
