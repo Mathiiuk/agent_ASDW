@@ -227,10 +227,14 @@ export function createTask({
  */
 export function getTask(id, projectRoot = process.cwd()) {
   // Construimos la ruta al manifiesto YAML
-  const taskYamlPath = path.join(projectRoot, DIRS.tasks, `${id}.yml`);
-  // Si no existe, arrojamos un error explicativo
+  let taskYamlPath = path.join(projectRoot, DIRS.tasks, `${id}.yml`);
   if (!fs.existsSync(taskYamlPath)) {
-    throw new Error(`No se encontró el manifiesto para la tarea '${id}' en ${taskYamlPath}`);
+    const fallbackPath = path.join(projectRoot, 'docs', 'workflow', 'tasks', `${id}.yml`);
+    if (fs.existsSync(fallbackPath)) {
+      taskYamlPath = fallbackPath;
+    } else {
+      throw new Error(`No se encontró el manifiesto para la tarea '${id}' en ${taskYamlPath}`);
+    }
   }
 
   // Leemos y parseamos el contenido YAML
@@ -239,36 +243,38 @@ export function getTask(id, projectRoot = process.cwd()) {
 }
 
 /**
- * Obtiene la lista completa de todas las tareas presentes en docs/workflow/tasks/.
+ * Obtiene la lista completa de todas las tareas presentes en .agents/workflow/tasks/ o docs/workflow/tasks/.
  * 
  * @param {string} projectRoot - Directorio raíz del proyecto
  * @returns {Array<object>} - Colección de tareas con su metadata
  */
 export function listTasks(projectRoot = process.cwd()) {
-  const tasksDir = path.join(projectRoot, DIRS.tasks);
-  // Si el directorio no existe, retornamos una lista vacía
-  if (!fs.existsSync(tasksDir)) {
-    return [];
-  }
+  const dirsToSearch = [
+    path.join(projectRoot, DIRS.tasks),
+    path.join(projectRoot, 'docs', 'workflow', 'tasks'),
+  ];
 
-  // Leemos todos los archivos con extensión .yml o .yaml
-  const files = fs.readdirSync(tasksDir).filter((file) => file.endsWith('.yml') || file.endsWith('.yaml'));
+  const tasksMap = new Map();
 
-  const tasks = [];
-  // Recorremos cada archivo de manifiesto
-  for (const file of files) {
-    try {
-      const filePath = path.join(tasksDir, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const data = yaml.load(content);
-      if (data && data.id) {
-        tasks.push(data);
+  for (const dir of dirsToSearch) {
+    if (!fs.existsSync(dir)) continue;
+
+    const files = fs.readdirSync(dir).filter((file) => file.endsWith('.yml') || file.endsWith('.yaml'));
+    for (const file of files) {
+      try {
+        const filePath = path.join(dir, file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data = yaml.load(content);
+        if (data && data.id && !tasksMap.has(data.id)) {
+          tasksMap.set(data.id, data);
+        }
+      } catch {
+        // Ignoramos archivos corruptos o ilegibles
       }
-    } catch {
-      // Ignoramos archivos corruptos o ilegibles
     }
   }
 
+  const tasks = Array.from(tasksMap.values());
   // Retornamos la lista ordenada por ID
   return tasks.sort((a, b) => a.id.localeCompare(b.id));
 }

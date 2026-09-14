@@ -90,8 +90,8 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
   const nodes = [];
   const edges = [];
 
-  // 1. ESCANEAMOS ARCHIVOS FUENTE EN src/, bin/, tests/
-  const scanDirs = ['src', 'bin', 'tests'];
+  // 1. ESCANEAMOS ARCHIVOS FUENTE EN src/, bin/, tests/, frontend/src, backend/src
+  const scanDirs = ['src', 'bin', 'tests', 'frontend/src', 'backend/src'];
   const allFiles = [];
 
   for (const sub of scanDirs) {
@@ -134,7 +134,7 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
     const taskNodeId = `task:${task.id}`;
     nodes.push({
       id: taskNodeId,
-      label: `${task.id}: ${task.title}`,
+      label: `${task.id}: ${task.title || task.summary || 'Sin título'}`,
       type: 'task',
       status: task.status,
       taskType: task.type,

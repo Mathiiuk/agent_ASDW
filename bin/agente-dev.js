@@ -208,7 +208,8 @@ program
       console.log(pc.cyan(`\n📋 Tareas registradas (${tasks.length}):\n`));
       for (const t of tasks) {
         const statusColor = t.status === 'DONE' ? pc.green : t.status === 'IN_PROGRESS' ? pc.yellow : pc.blue;
-        console.log(`  ${pc.bold(t.id.padEnd(12))} [${statusColor(t.status.padEnd(12))}] ${pc.white(t.title)} (${pc.dim(t.type)})`);
+        const displayTitle = (t.title || t.summary || 'Sin título').substring(0, 65);
+        console.log(`  ${pc.bold(t.id.padEnd(12))} [${statusColor(t.status.padEnd(12))}] ${pc.white(displayTitle)} (${pc.dim(t.type)})`);
       }
       console.log();
     } catch (error) {

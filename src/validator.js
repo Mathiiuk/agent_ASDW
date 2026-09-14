@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 // Importamos execSync para ejecutar los comandos de los quality gates en la shell
 import { execSync } from 'node:child_process';
 
@@ -29,9 +31,11 @@ export const VALID_STATUSES = [
  */
 export const VALID_TYPES = [
   'feat',
+  'feature',
   'fix',
   'hotfix',
   'refactor',
+  'redesign',
   'security',
   'test',
   'docs',
@@ -57,9 +61,10 @@ export function validateManifest(manifest) {
     errors.push('El campo obligatorio "id" falta o no es un string.');
   }
 
-  // Validación de campo 'title'
-  if (!manifest.title || typeof manifest.title !== 'string') {
-    errors.push('El campo obligatorio "title" falta o no es un string.');
+  // Validación de campo 'title' (o 'summary')
+  const title = manifest.title || manifest.summary;
+  if (!title || typeof title !== 'string') {
+    errors.push('El campo obligatorio "title" (o "summary") falta o no es un string.');
   }
 
   // Validación de campo 'type'
@@ -85,6 +90,33 @@ export function validateManifest(manifest) {
 }
 
 /**
+ * Obtiene el comando por defecto para un quality gate si no está especificado en el manifiesto.
+ */
+function getDefaultGateCommand(gateName, projectRoot) {
+  const hasFrontend = fs.existsSync(path.join(projectRoot, 'frontend', 'package.json'));
+  const prefix = hasFrontend ? 'npm --prefix frontend' : 'npm';
+
+  switch (gateName) {
+    case 'build':
+      return `${prefix} run build`;
+    case 'lint':
+      return `${prefix} run lint`;
+    case 'typecheck':
+      return hasFrontend ? 'node frontend/node_modules/typescript/bin/tsc -b frontend' : 'npx tsc --noEmit';
+    case 'security':
+      return `${prefix} audit`;
+    case 'unit_tests':
+      return `${prefix} test`;
+    case 'integration_tests':
+      return `${prefix} run test:integration`;
+    case 'e2e':
+      return `${prefix} run test:e2e`;
+    default:
+      return null;
+  }
+}
+
+/**
  * Ejecuta los Quality Gates configurados en el manifiesto de una tarea.
  * 
  * @param {object} taskManifest - Manifiesto de la tarea a verificar
@@ -101,7 +133,7 @@ export function runQualityGates(taskManifest, projectRoot = process.cwd()) {
   for (const [gateName, isEnabled] of Object.entries(gates)) {
     if (isEnabled) {
       // Buscamos el comando asociado al gate (ej: unit_tests -> commands.unit_tests)
-      const command = commands[gateName];
+      const command = commands[gateName] || getDefaultGateCommand(gateName, projectRoot);
 
       if (!command) {
         // Si el gate está activo pero no hay comando asignado, se marca como advertencia/fallo
@@ -110,7 +142,7 @@ export function runQualityGates(taskManifest, projectRoot = process.cwd()) {
           command: 'N/A',
           passed: false,
           output: '',
-          error: `Gate "${gateName}" activado pero no tiene comando configurado en "commands".`,
+          error: `Gate "${gateName}" activado pero no tiene comando configurado ni default.`,
         });
         allPassed = false;
         continue;

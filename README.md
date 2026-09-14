@@ -208,7 +208,7 @@ Given('un usuario en la base de datos', async function () {
 ---
 
 ### 10. Servidor MCP para Inteligencia Artificial (`agt mcp`)
-**Model Context Protocol (MCP)** permite que IDEs modernos (Antigravity 2.0, Cursor, Claude Desktop, Cline) consuman las herramientas de tu proyecto de manera nativa (sin interactuar con el texto de la consola).
+**Model Context Protocol (MCP)** permite que IDEs modernos (Antigravity 2.0, Cursor, Claude Desktop, Cline) operen el ciclo de vida completo del workflow de forma nativa (sin depender de interpretar texto de consola ni de que el usuario ejecute comandos manualmente).
 
 ```bash
 # Iniciar el servidor (Usa la entrada/salida estándar stdio)
@@ -227,7 +227,25 @@ Agrega la siguiente configuración en tu panel de herramientas MCP o en tu archi
   }
 }
 ```
-*Impacto:* Tu agente de IA obtendrá acceso nativo para ejecutar `list_active_tasks` y `query_graphify_memory` como botones interactivos directos, comprendiendo tu proyecto infinitamente mejor.
+
+**Herramientas expuestas (acción, no solo lectura):**
+
+| Herramienta | Equivalente CLI | Propósito |
+|---|---|---|
+| `list_active_tasks` | `task:list` | Listar todas las tareas del workflow |
+| `get_task` | `task:status <id>` | Leer el manifiesto completo de una tarea |
+| `create_task` | `task:new` | Crear una tarea nueva y su rama de Git |
+| `update_task_status` | `task:status <id> <status>` | Cambiar el estado de una tarea |
+| `checkout_task_branch` | `task:branch` | Conmutar/crear la rama Git de una tarea |
+| `verify_task_quality_gates` | `task:verify` | Validar manifiesto y correr los Quality Gates |
+| `run_self_healing_loop` | `task:loop` | Ejecutar los gates y devolver diagnóstico estructurado |
+| `record_lesson` | `memory:learn` | Registrar una lección/trampa evitada |
+| `sync_knowledge_graph` | `memory:sync` | Reconstruir el grafo de conocimiento |
+| `query_graphify_memory` | `memory:query` | Consultar contexto y lecciones por palabra clave |
+| `generate_release` | `release` | Consolidar tareas DONE en un CHANGELOG |
+| `generate_bdd_scaffold` | `test:scaffold` | Generar Step Definitions desde un `.feature` |
+
+*Impacto:* el agente de IA conectado obtiene control real sobre el flujo — crea la tarea, escribe el código, llama a `verify_task_quality_gates`/`run_self_healing_loop`, lee el diagnóstico estructurado (categoría + sugerencia por gate fallido), corrige el código con sus propias herramientas de edición, y vuelve a invocar la herramienta hasta que todo pase. Ese ciclo de "ejecutar → diagnosticar → corregir → reverificar" impulsado por el propio agente de IA es lo que lo convierte en un flujo de trabajo autónomo real, en vez de un simple generador de plantillas.
 
 ---
 
