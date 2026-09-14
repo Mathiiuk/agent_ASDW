@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-08-29T15:26:51.381Z",
-  "project": "agente_dev",
+  "updatedAt": "2026-09-14T12:11:17.382Z",
+  "project": "agent_ASDW",
   "metrics": {
-    "totalNodes": 23,
-    "totalEdges": 59,
-    "totalTasks": 8,
+    "totalNodes": 31,
+    "totalEdges": 90,
+    "totalTasks": 9,
     "totalLessons": 3
   },
   "nodes": [
@@ -12,8 +12,8 @@
       "id": "src/git.js",
       "label": "git.js",
       "type": "module",
-      "sizeBytes": 6086,
-      "lineCount": 162,
+      "sizeBytes": 6727,
+      "lineCount": 176,
       "imports": [
         "node:child_process"
       ]
@@ -22,16 +22,16 @@
       "id": "src/index.js",
       "label": "index.js",
       "type": "module",
-      "sizeBytes": 596,
-      "lineCount": 18,
+      "sizeBytes": 856,
+      "lineCount": 27,
       "imports": []
     },
     {
       "id": "src/init.js",
       "label": "init.js",
       "type": "module",
-      "sizeBytes": 4739,
-      "lineCount": 127,
+      "sizeBytes": 9850,
+      "lineCount": 262,
       "imports": [
         "node:fs",
         "node:path",
@@ -39,11 +39,25 @@
       ]
     },
     {
+      "id": "src/mcp-server.js",
+      "label": "mcp-server.js",
+      "type": "module",
+      "sizeBytes": 9138,
+      "lineCount": 248,
+      "imports": [
+        "@modelcontextprotocol/sdk/server/index.js",
+        "@modelcontextprotocol/sdk/server/stdio.js",
+        "@modelcontextprotocol/sdk/types.js",
+        "node:process",
+        "./index.js"
+      ]
+    },
+    {
       "id": "src/memory.js",
       "label": "memory.js",
       "type": "module",
-      "sizeBytes": 9703,
-      "lineCount": 308,
+      "sizeBytes": 11862,
+      "lineCount": 336,
       "imports": [
         "node:fs",
         "node:path",
@@ -51,11 +65,37 @@
       ]
     },
     {
+      "id": "src/release-manager.js",
+      "label": "release-manager.js",
+      "type": "module",
+      "sizeBytes": 3901,
+      "lineCount": 105,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "js-yaml",
+        "./task-manager.js"
+      ]
+    },
+    {
+      "id": "src/scaffolder.js",
+      "label": "scaffolder.js",
+      "type": "module",
+      "sizeBytes": 3095,
+      "lineCount": 85,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "@cucumber/cucumber",
+        "node:assert"
+      ]
+    },
+    {
       "id": "src/task-manager.js",
       "label": "task-manager.js",
       "type": "module",
-      "sizeBytes": 11183,
-      "lineCount": 294,
+      "sizeBytes": 11688,
+      "lineCount": 300,
       "imports": [
         "node:fs",
         "node:path",
@@ -67,9 +107,11 @@
       "id": "src/validator.js",
       "label": "validator.js",
       "type": "module",
-      "sizeBytes": 4455,
-      "lineCount": 155,
+      "sizeBytes": 5684,
+      "lineCount": 187,
       "imports": [
+        "node:fs",
+        "node:path",
         "node:child_process"
       ]
     },
@@ -77,7 +119,7 @@
       "id": "src/workflow-runner.js",
       "label": "workflow-runner.js",
       "type": "module",
-      "sizeBytes": 6744,
+      "sizeBytes": 6912,
       "lineCount": 169,
       "imports": [
         "node:fs",
@@ -90,8 +132,8 @@
       "id": "bin/agente-dev.js",
       "label": "agente-dev.js",
       "type": "cli",
-      "sizeBytes": 14204,
-      "lineCount": 378,
+      "sizeBytes": 16584,
+      "lineCount": 462,
       "imports": [
         "commander",
         "picocolors",
@@ -99,10 +141,21 @@
       ]
     },
     {
+      "id": "tests/bdd/steps/AGT-0010.steps.js",
+      "label": "AGT-0010.steps.js",
+      "type": "test",
+      "sizeBytes": 1974,
+      "lineCount": 66,
+      "imports": [
+        "@cucumber/cucumber",
+        "node:assert"
+      ]
+    },
+    {
       "id": "tests/bdd/steps/task-steps.js",
       "label": "task-steps.js",
       "type": "test",
-      "sizeBytes": 5017,
+      "sizeBytes": 5147,
       "lineCount": 131,
       "imports": [
         "@cucumber/cucumber",
@@ -117,7 +170,7 @@
       "id": "tests/git.test.js",
       "label": "git.test.js",
       "type": "test",
-      "sizeBytes": 2520,
+      "sizeBytes": 2581,
       "lineCount": 62,
       "imports": [
         "vitest",
@@ -128,7 +181,7 @@
       "id": "tests/init.test.js",
       "label": "init.test.js",
       "type": "test",
-      "sizeBytes": 2837,
+      "sizeBytes": 2899,
       "lineCount": 63,
       "imports": [
         "vitest",
@@ -139,10 +192,24 @@
       ]
     },
     {
+      "id": "tests/mcp-server.test.js",
+      "label": "mcp-server.test.js",
+      "type": "test",
+      "sizeBytes": 3828,
+      "lineCount": 89,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "../src/mcp-server.js"
+      ]
+    },
+    {
       "id": "tests/memory.test.js",
       "label": "memory.test.js",
       "type": "test",
-      "sizeBytes": 3561,
+      "sizeBytes": 3662,
       "lineCount": 102,
       "imports": [
         "vitest",
@@ -154,10 +221,36 @@
       ]
     },
     {
+      "id": "tests/release-manager.test.js",
+      "label": "release-manager.test.js",
+      "type": "test",
+      "sizeBytes": 1686,
+      "lineCount": 47,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "../src/release-manager.js",
+        "../src/task-manager.js"
+      ]
+    },
+    {
+      "id": "tests/scaffolder.test.js",
+      "label": "scaffolder.test.js",
+      "type": "test",
+      "sizeBytes": 1978,
+      "lineCount": 54,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "../src/scaffolder.js"
+      ]
+    },
+    {
       "id": "tests/task-manager.test.js",
       "label": "task-manager.test.js",
       "type": "test",
-      "sizeBytes": 3898,
+      "sizeBytes": 3999,
       "lineCount": 102,
       "imports": [
         "vitest",
@@ -171,7 +264,7 @@
       "id": "tests/validator.test.js",
       "label": "validator.test.js",
       "type": "test",
-      "sizeBytes": 2680,
+      "sizeBytes": 2764,
       "lineCount": 85,
       "imports": [
         "vitest",
@@ -182,7 +275,7 @@
       "id": "tests/workflow-runner.test.js",
       "label": "workflow-runner.test.js",
       "type": "test",
-      "sizeBytes": 4236,
+      "sizeBytes": 4357,
       "lineCount": 122,
       "imports": [
         "vitest",
@@ -248,6 +341,13 @@
       "type": "task",
       "status": "READY_FOR_PR",
       "taskType": "fix"
+    },
+    {
+      "id": "task:AGT-0010",
+      "label": "AGT-0010: Integracion de MCP, Release Manager y BDD Scaffolder",
+      "type": "task",
+      "status": "PLANNED",
+      "taskType": "feat"
     }
   ],
   "edges": [
@@ -272,6 +372,31 @@
       "relation": "depends_on"
     },
     {
+      "from": "src/mcp-server.js",
+      "to": "@modelcontextprotocol/sdk/server/index.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/mcp-server.js",
+      "to": "@modelcontextprotocol/sdk/server/stdio.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/mcp-server.js",
+      "to": "@modelcontextprotocol/sdk/types.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/mcp-server.js",
+      "to": "node:process",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/mcp-server.js",
+      "to": "./index.js",
+      "relation": "depends_on"
+    },
+    {
       "from": "src/memory.js",
       "to": "node:fs",
       "relation": "depends_on"
@@ -284,6 +409,46 @@
     {
       "from": "src/memory.js",
       "to": "./task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/release-manager.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/release-manager.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/release-manager.js",
+      "to": "js-yaml",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/release-manager.js",
+      "to": "./task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/scaffolder.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/scaffolder.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/scaffolder.js",
+      "to": "@cucumber/cucumber",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/scaffolder.js",
+      "to": "node:assert",
       "relation": "depends_on"
     },
     {
@@ -304,6 +469,16 @@
     {
       "from": "src/task-manager.js",
       "to": "./git.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/validator.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/validator.js",
+      "to": "node:path",
       "relation": "depends_on"
     },
     {
@@ -344,6 +519,16 @@
     {
       "from": "bin/agente-dev.js",
       "to": "../src/index.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0010.steps.js",
+      "to": "@cucumber/cucumber",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0010.steps.js",
+      "to": "node:assert",
       "relation": "depends_on"
     },
     {
@@ -412,6 +597,31 @@
       "relation": "depends_on"
     },
     {
+      "from": "tests/mcp-server.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/mcp-server.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/mcp-server.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/mcp-server.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/mcp-server.test.js",
+      "to": "../src/mcp-server.js",
+      "relation": "depends_on"
+    },
+    {
       "from": "tests/memory.test.js",
       "to": "vitest",
       "relation": "depends_on"
@@ -439,6 +649,46 @@
     {
       "from": "tests/memory.test.js",
       "to": "./db.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/release-manager.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/release-manager.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/release-manager.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/release-manager.test.js",
+      "to": "../src/release-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/release-manager.test.js",
+      "to": "../src/task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/scaffolder.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/scaffolder.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/scaffolder.test.js",
+      "to": "../src/scaffolder.js",
       "relation": "depends_on"
     },
     {
@@ -544,6 +794,11 @@
     {
       "from": "task:AGT-0008",
       "to": ".agents/workflow/tasks/AGT-0008.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0010",
+      "to": ".agents/workflow/tasks/AGT-0010.yml",
       "relation": "manifested_by"
     }
   ],

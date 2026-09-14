@@ -196,11 +196,18 @@ function generateCompactContext(graphData, projectRoot = process.cwd()) {
 
   md += `## 📦 Mapa de Módulos y Dependencias\n\n`;
   const modules = graphData.nodes.filter((n) => n.type === 'module' || n.type === 'cli');
+  // Limitamos la tabla para que context.md no crezca sin límite en proyectos grandes
+  // (el objetivo del archivo es resumir en pocos tokens, no listar cada archivo).
+  const MAX_MODULES_IN_TABLE = 25;
+  const modulesToList = [...modules].sort((a, b) => b.lineCount - a.lineCount).slice(0, MAX_MODULES_IN_TABLE);
   md += `| Módulo | Líneas | Dependencias Principales |\n`;
   md += `|---|---|---|\n`;
-  for (const mod of modules) {
+  for (const mod of modulesToList) {
     const deps = mod.imports.slice(0, 3).join(', ') || 'ninguna';
     md += `| \`${mod.id}\` | ${mod.lineCount} | ${deps} |\n`;
+  }
+  if (modules.length > modulesToList.length) {
+    md += `\n_(+${modules.length - modulesToList.length} módulos adicionales; consultar con \`memory:query\`)_\n`;
   }
 
   md += `\n## 📋 Tareas Registradas\n\n`;
@@ -266,12 +273,16 @@ export function recordLesson({
 
 /**
  * Realiza una consulta semántica al grafo de memoria para obtener contexto relevante en pocos tokens.
- * 
+ * El resultado se recorta a `limit` coincidencias por categoría: una keyword común en un
+ * proyecto grande puede matchear decenas de nodos, y devolverlos todos sin límite iría
+ * en contra del propósito de "ahorro de tokens" de este sistema.
+ *
  * @param {string} keyword - Palabra clave a buscar (ej: "git", "turnos", "oauth")
  * @param {string} projectRoot - Directorio raíz del proyecto
- * @returns {{ matchedNodes: object[], matchedLessons: object[], relatedEdges: object[] }} - Resultados de la consulta
+ * @param {number} [limit=15] - Máximo de coincidencias a devolver por categoría (nodos/lecciones)
+ * @returns {{ matchedNodes: object[], matchedLessons: object[], relatedEdges: object[], totalMatches: object, truncated: boolean }} - Resultados de la consulta
  */
-export function queryMemory(keyword, projectRoot = process.cwd()) {
+export function queryMemory(keyword, projectRoot = process.cwd(), limit = 15) {
   const graphPath = path.join(projectRoot, MEMORY_PATHS.graph);
 
   // Si no existe el grafo, lo construimos al vuelo
@@ -285,23 +296,40 @@ export function queryMemory(keyword, projectRoot = process.cwd()) {
   const lowerKey = (keyword || '').toLowerCase();
 
   // Filtramos nodos coincidentes
-  const matchedNodes = graphData.nodes.filter(
+  const allMatchedNodes = graphData.nodes.filter(
     (n) => n.id.toLowerCase().includes(lowerKey) || (n.label && n.label.toLowerCase().includes(lowerKey))
   );
 
   // Filtramos lecciones coincidentes
-  const matchedLessons = graphData.lessons.filter(
+  const allMatchedLessons = graphData.lessons.filter(
     (l) => l.lesson.toLowerCase().includes(lowerKey) || l.category.toLowerCase().includes(lowerKey)
   );
 
-  // Extraemos aristas vinculadas a los nodos encontrados
-  const matchedIds = new Set(matchedNodes.map((n) => n.id));
-  const relatedEdges = graphData.edges.filter((e) => matchedIds.has(e.from) || matchedIds.has(e.to));
+  // Extraemos aristas vinculadas a los nodos encontrados (sobre el set completo de matches)
+  const matchedIds = new Set(allMatchedNodes.map((n) => n.id));
+  const allRelatedEdges = graphData.edges.filter((e) => matchedIds.has(e.from) || matchedIds.has(e.to));
+
+  // Descartamos campos pesados (imports, sizeBytes, lineCount) que no aportan a una
+  // consulta puntual por palabra clave; sólo se necesitan para el grafo completo.
+  const trimNode = (n) => ({ id: n.id, label: n.label, type: n.type, status: n.status, taskType: n.taskType });
+
+  const matchedNodes = allMatchedNodes.slice(0, limit).map(trimNode);
+  const matchedLessons = allMatchedLessons.slice(0, limit);
+  const relatedEdges = allRelatedEdges.slice(0, limit * 2);
 
   return {
     query: keyword,
     matchedNodes,
     matchedLessons,
     relatedEdges,
+    totalMatches: {
+      nodes: allMatchedNodes.length,
+      lessons: allMatchedLessons.length,
+      edges: allRelatedEdges.length,
+    },
+    truncated:
+      matchedNodes.length < allMatchedNodes.length ||
+      matchedLessons.length < allMatchedLessons.length ||
+      relatedEdges.length < allRelatedEdges.length,
   };
 }

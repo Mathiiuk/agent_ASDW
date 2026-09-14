@@ -120,10 +120,13 @@ export const TOOLS = [
   },
   {
     name: 'query_graphify_memory',
-    description: 'Consulta el Grafo de Conocimiento (módulos, dependencias, tareas) o las lecciones aprendidas dado un término clave.',
+    description: 'Consulta el Grafo de Conocimiento (módulos, dependencias, tareas) o las lecciones aprendidas dado un término clave. El resultado se recorta a `limit` coincidencias por categoría.',
     inputSchema: {
       type: 'object',
-      properties: { keyword: { type: 'string', description: 'Palabra clave a buscar (ej: "auth", "login", "database")' } },
+      properties: {
+        keyword: { type: 'string', description: 'Palabra clave a buscar (ej: "auth", "login", "database")' },
+        limit: { type: 'number', description: 'Máximo de coincidencias por categoría a devolver (default 15)' },
+      },
       required: ['keyword'],
     },
   },
@@ -194,7 +197,7 @@ export const TOOL_HANDLERS = {
 
   sync_knowledge_graph: async (_args, cwd) => buildKnowledgeGraph(cwd),
 
-  query_graphify_memory: async ({ keyword }, cwd) => queryMemory(keyword, cwd),
+  query_graphify_memory: async ({ keyword, limit }, cwd) => queryMemory(keyword, cwd, limit || 15),
 
   generate_release: async ({ version }, cwd) => generateRelease(version, cwd),
 
