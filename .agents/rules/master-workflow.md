@@ -36,6 +36,8 @@ El agente opera asumiendo los roles especializados según la naturaleza de la ta
    - GitHub Actions, Docker, pipelines de validación, despliegues y rollback.
 8. **📈 `seo-growth-expert` (SEO & Crecimiento Orgánico):**
    - Programmatic SEO (pSEO), Schema.org JSON-LD, Core Web Vitals y OpenGraph.
+9. **🪢 `ponytail` (Mínimo cambio completo, transversal):**
+   - Se aplica en toda tarea de código junto al rol que corresponda: el cambio más chico que resuelve el problema completo, sin recortar validación, seguridad ni tests. Nivel por defecto `full`; cambia con `/ponytail lite|full|ultra`.
 
 ---
 
