@@ -1,6 +1,4 @@
-// Importamos las utilidades de testing de Vitest
 import { describe, it, expect } from 'vitest';
-// Importamos las funciones de validación
 import { validateManifest, runQualityGates } from '../src/validator.js';
 
 describe('Módulo de Validación y Quality Gates (src/validator.js)', () => {

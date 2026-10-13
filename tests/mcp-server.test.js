@@ -1,10 +1,7 @@
-// Importamos las utilidades de testing de Vitest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-// Importamos módulos de sistema de archivos para crear entornos temporales de prueba
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-// Importamos el catálogo y los handlers del servidor MCP (sin necesidad de levantar stdio)
 import { TOOLS, TOOL_HANDLERS } from '../src/mcp-server.js';
 
 describe('Servidor MCP - Catálogo y Handlers de Herramientas (src/mcp-server.js)', () => {
@@ -74,7 +71,6 @@ describe('Servidor MCP - Catálogo y Handlers de Herramientas (src/mcp-server.js
       tempDir
     );
 
-    // Forzamos un comando de quality gate que siempre falla
     const taskYamlPath = path.join(tempDir, '.agents', 'workflow', 'tasks', 'MCP-0002.yml');
     let content = fs.readFileSync(taskYamlPath, 'utf-8');
     content = content.replace('unit_tests: pnpm test', 'unit_tests: node -e "process.exit(1)"');

@@ -1,7 +1,5 @@
-// Importamos los módulos nativos de sistema de archivos y rutas
 import fs from 'node:fs';
 import path from 'node:path';
-// Importamos las utilidades de tareas y validación existentes en nuestro motor
 import { getTask, updateTaskStatus } from './task-manager.js';
 import { runQualityGates } from './validator.js';
 
@@ -54,7 +52,6 @@ export function diagnoseFailure(results) {
  */
 export function generateExecutionReport(id, summary, projectRoot = process.cwd()) {
   const executionsDir = path.join(projectRoot, '.agents', 'workflow', 'executions');
-  // Aseguramos que el directorio de ejecuciones exista
   if (!fs.existsSync(executionsDir)) {
     fs.mkdirSync(executionsDir, { recursive: true });
   }
@@ -62,7 +59,6 @@ export function generateExecutionReport(id, summary, projectRoot = process.cwd()
   const reportPath = path.join(executionsDir, `${id}.md`);
   const timestamp = new Date().toISOString();
 
-  // Redactamos el contenido del reporte en formato Markdown
   let markdown = `# Reporte de Ejecución Automatizada - ${id}\n\n`;
   markdown += `## 1. Resumen General\n`;
   markdown += `- **ID de Tarea:** ${id}\n`;
@@ -89,7 +85,6 @@ export function generateExecutionReport(id, summary, projectRoot = process.cwd()
     });
   }
 
-  // Guardamos el reporte en disco
   fs.writeFileSync(reportPath, markdown, 'utf-8');
   return reportPath;
 }
@@ -110,17 +105,14 @@ export async function runTaskLoop({
   fixHandler = null,
   projectRoot = process.cwd(),
 }) {
-  // Obtenemos los datos actuales de la tarea
   const task = getTask(id, projectRoot);
   let iteration = 0;
   let allPassed = false;
   let lastResults = [];
   let diagnostics = [];
 
-  // Actualizamos el estado a IN_PROGRESS al iniciar la ejecución
   updateTaskStatus(id, 'IN_PROGRESS', projectRoot);
 
-  // Iniciamos el bucle cerrado
   while (iteration < maxRetries && !allPassed) {
     iteration++;
 
@@ -146,7 +138,6 @@ export async function runTaskLoop({
     }
   }
 
-  // Generamos el reporte final con la evidencia
   const reportPath = generateExecutionReport(
     id,
     {

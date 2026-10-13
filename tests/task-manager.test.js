@@ -1,10 +1,7 @@
-// Importamos las utilidades de testing de Vitest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-// Importamos módulos de sistema de archivos para crear entornos temporales de prueba
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-// Importamos las funciones del módulo de gestión de tareas
 import { createTask, getTask, listTasks, updateTaskStatus } from '../src/task-manager.js';
 
 describe('Módulo de Gestión de Tareas (src/task-manager.js)', () => {
@@ -23,7 +20,6 @@ describe('Módulo de Gestión de Tareas (src/task-manager.js)', () => {
   });
 
   it('debe crear los 5 artefactos del workflow (task, spec, plan, test, feature)', () => {
-    // Invocamos la creación de una tarea en el directorio temporal sin crear rama git
     const result = createTask({
       id: 'TEST-0001',
       title: 'Prueba de Creación de Artefactos',
@@ -33,10 +29,8 @@ describe('Módulo de Gestión de Tareas (src/task-manager.js)', () => {
       projectRoot: tempDir,
     });
 
-    // Verificamos que se hayan generado 5 archivos (incluyendo el .feature de Gherkin)
     expect(result.files).toHaveLength(5);
 
-    // Verificamos la existencia física de cada archivo en el directorio temporal
     const taskYaml = path.join(tempDir, '.agents', 'workflow', 'tasks', 'TEST-0001.yml');
     const specMd = path.join(tempDir, '.agents', 'workflow', 'specs', 'TEST-0001.md');
     const planMd = path.join(tempDir, '.agents', 'workflow', 'plans', 'TEST-0001.md');
@@ -49,7 +43,6 @@ describe('Módulo de Gestión de Tareas (src/task-manager.js)', () => {
     expect(fs.existsSync(testMd)).toBe(true);
     expect(fs.existsSync(featureFile)).toBe(true);
 
-    // Verificamos que el manifiesto se pueda leer con getTask
     const taskData = getTask('TEST-0001', tempDir);
     expect(taskData.id).toBe('TEST-0001');
     expect(taskData.title).toBe('Prueba de Creación de Artefactos');
@@ -59,7 +52,6 @@ describe('Módulo de Gestión de Tareas (src/task-manager.js)', () => {
   });
 
   it('debe listar todas las tareas creadas correctamente', () => {
-    // Creamos dos tareas en el directorio temporal
     createTask({
       id: 'TEST-0001',
       title: 'Primera Tarea',
