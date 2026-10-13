@@ -53,11 +53,9 @@ export function generateBddScaffold(taskId, projectRoot = process.cwd()) {
     return { success: false, message: 'No se encontraron pasos (Given, When, Then) en el archivo feature.' };
   }
 
-  // Generamos el código JS del esqueleto
   let jsCode = `import { Given, When, Then } from '@cucumber/cucumber';\nimport assert from 'node:assert';\n\n`;
 
   for (const step of steps) {
-    // Usamos keyword base (Given, When, Then) en código real
     // (Por convención, si es And/But usamos Given o ignoramos la keyword estricta,
     //  aquí forzamos Given, When o Then basándonos en mapeos comunes).
     let importKw = ['Given', 'When', 'Then'].includes(step.keyword) ? step.keyword : 'Given';

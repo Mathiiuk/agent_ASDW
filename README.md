@@ -1,8 +1,40 @@
-# 🤖 Agente Dev - Autonomous Software Delivery Workflow & CLI
+# 🤖 Agente Dev (`agt`)
 
-> **Orquestador de Entrega Continua y Flujo de Trabajo Autónomo para Agentes de Desarrollo de Software.**
+[![CI](https://github.com/Mathiiuk/agent_ASDW/actions/workflows/ci.yml/badge.svg)](https://github.com/Mathiiuk/agent_ASDW/actions/workflows/ci.yml)
+![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-Vitest%20%2B%20Cucumber-6E9F18)
+![MCP](https://img.shields.io/badge/MCP-server-blueviolet)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-Este proyecto implementa un marco metodológico y una herramienta de línea de comandos (**CLI**) para gobernar el ciclo de vida completo de tareas y funcionalidades (desde la especificación técnica hasta la validación y el reporte final). Garantiza trazabilidad, calidad (*Quality Gates*), desarrollo guiado por pruebas (*TDD*), creación automática de ramas en Git y auto-corrección (*Self-Healing*).
+> **CLI para que agentes de IA (Cursor, Claude, Windsurf, Cline, Antigravity) trabajen con el mismo rigor que un equipo de ingeniería:** cada tarea nace con su spec, su plan, su rama de Git y sus quality gates, y no se cierra hasta que pasan.
+
+## ¿Qué problema resuelve?
+
+Cuando un agente de IA escribe código sin un proceso, el resultado es difícil de revisar: cambios sin especificación, sin tests y mezclados en una misma rama. **Agente Dev** le impone un flujo de entrega estandarizado a cualquier proyecto existente con un solo comando (`agt init`).
+
+| Capacidad | Cómo |
+|---|---|
+| **Trazabilidad** | `agt task:new` genera spec, plan, plan de pruebas, escenario Gherkin y manifiesto YAML, y crea la rama `<tipo>/<ID>-<slug>`. |
+| **Quality gates** | `agt task:verify` ejecuta los comandos de test, lint y build declarados en el manifiesto y bloquea el avance si alguno falla. |
+| **Bucle de verificación** | `agt task:loop` reintenta los gates, clasifica cada fallo (aserción, sintaxis, import, configuración) y acepta un `fixHandler` para que el agente aplique la corrección entre intentos. |
+| **Máquina de estados** | `PLANNED → IN_PROGRESS → VERIFYING → FIXING → READY_FOR_PR → DONE`, persistida en cada manifiesto. |
+| **Integración con IDEs de IA** | Servidor **MCP** (`agt mcp`) y archivos de reglas para Cursor, Windsurf, Cline y Antigravity. |
+| **Releases** | `agt release vX.Y.Z` consolida las tareas terminadas en un CHANGELOG. |
+| **Memoria del proyecto** | Grafo de dependencias y registro de lecciones aprendidas consultable en pocos tokens. |
+
+**Stack:** Node.js (ESM) · Commander · `@modelcontextprotocol/sdk` · js-yaml · Vitest · Cucumber/Gherkin · GitHub Actions (matriz Node 22/24) · pnpm
+
+## Demo rápida
+
+```bash
+cd mi-proyecto && agt init                       # adopta el flujo en un repo existente
+agt task:new AGT-0001 -t "Login con Google"      # spec + plan + rama feat/AGT-0001-login-con-google
+agt task:verify AGT-0001                         # corre los quality gates
+agt task:loop AGT-0001 --max-retries 3           # verifica, diagnostica y genera el reporte
+agt release v1.0.0                               # changelog de lo terminado
+```
+
+**Autor:** [Matias Krepchuk](https://www.linkedin.com/in/krepchuk-matias/) · Este repositorio se desarrolla con su propio flujo: ver `.agents/workflow/` (tareas AGT-0001 a AGT-0010).
 
 ---
 
@@ -30,8 +62,8 @@ Este proyecto implementa un marco metodológico y una herramienta de línea de c
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone <URL_DEL_REPOSITORIO>
-cd agente_dev
+git clone https://github.com/Mathiiuk/agent_ASDW.git
+cd agent_ASDW
 ```
 
 ### 2. Instalar Dependencias con `pnpm`
@@ -118,8 +150,8 @@ agt task:verify AGT-0001
 
 ---
 
-### 4. Ejecutar el Bucle Autónomo de Auto-Corrección (Self-Healing Loop)
-Ejecuta el ciclo cerrado completo: evalúa quality gates, diagnostica causas de fallos si los hay, reintenta hasta el límite configurado y genera automáticamente el reporte final en `docs/workflow/executions/<ID>.md`:
+### 4. Ejecutar el bucle de verificación (Self-Healing Loop)
+Ejecuta el ciclo cerrado: evalúa los quality gates, clasifica la causa de cada fallo, reintenta hasta el límite configurado y genera el reporte final en `.agents/workflow/executions/<ID>.md`. La corrección entre intentos la aplica el agente de IA (vía MCP) o una función `fixHandler` pasada a `runTaskLoop()`; la CLI se encarga de verificar y documentar:
 
 ```bash
 # Ejecutar bucle con 3 reintentos por defecto
@@ -369,4 +401,8 @@ pnpm test:bdd
 
 ## 💡 Principio de Aprendizaje y Código Limpio
 
-Todo el código fuente en `src/`, `bin/`, `tests/` y las plantillas `.feature` está exhaustivamente **comentado en español línea por línea**, permitiendo entender en detalle cómo funciona cada algoritmo, comando de Git, step definition de Cucumber y validación de esquemas.
+El código está documentado con JSDoc en español en cada función pública, y los comentarios en línea se reservan para explicar decisiones no obvias (por ejemplo, el manejo de *detached HEAD* en GitHub Actions).
+
+## 📄 Licencia
+
+MIT © Matias Krepchuk

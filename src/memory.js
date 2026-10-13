@@ -1,7 +1,5 @@
-// Importamos módulos nativos de sistema de archivos y rutas
 import fs from 'node:fs';
 import path from 'node:path';
-// Importamos funciones del gestor de tareas
 import { listTasks } from './task-manager.js';
 
 /**
@@ -61,7 +59,6 @@ function scanFiles(dir, extensions = ['.js', '.ts', '.jsx', '.tsx', '.json', '.f
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
-    // Ignoramos node_modules y .git
     if (entry.name === 'node_modules' || entry.name === '.git') {
       continue;
     }
@@ -118,7 +115,6 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
 
     nodes.push(node);
 
-    // Creamos aristas de dependencia
     for (const imp of imports) {
       edges.push({
         from: relativePath,
@@ -172,7 +168,6 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
     lessons,
   };
 
-  // Guardamos graph.json
   const graphFile = path.join(projectRoot, MEMORY_PATHS.graph);
   fs.writeFileSync(graphFile, JSON.stringify(graphData, null, 2), 'utf-8');
 
@@ -196,7 +191,6 @@ function generateCompactContext(graphData, projectRoot = process.cwd()) {
 
   md += `## 📦 Mapa de Módulos y Dependencias\n\n`;
   const modules = graphData.nodes.filter((n) => n.type === 'module' || n.type === 'cli');
-  // Limitamos la tabla para que context.md no crezca sin límite en proyectos grandes
   // (el objetivo del archivo es resumir en pocos tokens, no listar cada archivo).
   const MAX_MODULES_IN_TABLE = 25;
   const modulesToList = [...modules].sort((a, b) => b.lineCount - a.lineCount).slice(0, MAX_MODULES_IN_TABLE);
@@ -295,21 +289,17 @@ export function queryMemory(keyword, projectRoot = process.cwd(), limit = 15) {
 
   const lowerKey = (keyword || '').toLowerCase();
 
-  // Filtramos nodos coincidentes
   const allMatchedNodes = graphData.nodes.filter(
     (n) => n.id.toLowerCase().includes(lowerKey) || (n.label && n.label.toLowerCase().includes(lowerKey))
   );
 
-  // Filtramos lecciones coincidentes
   const allMatchedLessons = graphData.lessons.filter(
     (l) => l.lesson.toLowerCase().includes(lowerKey) || l.category.toLowerCase().includes(lowerKey)
   );
 
-  // Extraemos aristas vinculadas a los nodos encontrados (sobre el set completo de matches)
   const matchedIds = new Set(allMatchedNodes.map((n) => n.id));
   const allRelatedEdges = graphData.edges.filter((e) => matchedIds.has(e.from) || matchedIds.has(e.to));
 
-  // Descartamos campos pesados (imports, sizeBytes, lineCount) que no aportan a una
   // consulta puntual por palabra clave; sólo se necesitan para el grafo completo.
   const trimNode = (n) => ({ id: n.id, label: n.label, type: n.type, status: n.status, taskType: n.taskType });
 

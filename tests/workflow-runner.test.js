@@ -1,10 +1,7 @@
-// Importamos las utilidades de testing de Vitest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-// Importamos módulos de sistema de archivos para crear entornos temporales de prueba
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-// Importamos los módulos a probar
 import { createTask, getTask } from '../src/task-manager.js';
 import { diagnoseFailure, generateExecutionReport, runTaskLoop } from '../src/workflow-runner.js';
 
@@ -89,7 +86,6 @@ describe('Módulo de Bucle Autónomo (src/workflow-runner.js)', () => {
 
   describe('runTaskLoop()', () => {
     it('debe completar el bucle con éxito si los quality gates están en verde', async () => {
-      // Creamos una tarea con un comando exitoso
       createTask({
         id: 'TEST-LOOP-SUCCESS',
         title: 'Bucle Exitoso',
@@ -97,7 +93,6 @@ describe('Módulo de Bucle Autónomo (src/workflow-runner.js)', () => {
         projectRoot: tempDir,
       });
 
-      // Modificamos el manifiesto temporal para que ejecute un comando simple que retorna 0
       const taskPath = path.join(tempDir, '.agents', 'workflow', 'tasks', 'TEST-LOOP-SUCCESS.yml');
       const task = getTask('TEST-LOOP-SUCCESS', tempDir);
       task.quality_gates = { quick_check: true };
@@ -113,7 +108,6 @@ describe('Módulo de Bucle Autónomo (src/workflow-runner.js)', () => {
       expect(result.success).toBe(true);
       expect(result.iterations).toBe(1);
 
-      // Verificamos que el estado de la tarea sea READY_FOR_PR
       const updated = getTask('TEST-LOOP-SUCCESS', tempDir);
       expect(updated.status).toBe('READY_FOR_PR');
     });

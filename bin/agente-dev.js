@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
-// Importamos la librería Commander para gestionar los argumentos y comandos de la CLI
 import { Command } from 'commander';
-// Importamos picocolors para formatear y colorear la salida en la terminal
 import pc from 'picocolors';
-// Importamos las funciones del núcleo de nuestro agente
 import {
   createTask,
   getTask,
@@ -24,10 +21,8 @@ import {
   startMcpServer,
 } from '../src/index.js';
 
-// Inicializamos el programa CLI
 const program = new Command();
 
-// Configuramos metadatos básicos de la CLI
 program
   .name('agt')
   .description('CLI del Agente de Workflow Autónomo - Orquestador de Tareas y Ramas Git')
@@ -87,7 +82,6 @@ program
     try {
       console.log(pc.cyan(`\nCreando tarea: ${pc.bold(id)}`));
 
-      // Invocamos la función del gestor de tareas
       const result = createTask({
         id,
         title: options.title,
@@ -121,13 +115,10 @@ program
   .description('Conmuta a la rama de Git correspondiente a la tarea especificada')
   .action((id) => {
     try {
-      // Obtenemos los datos de la tarea existente
       const task = getTask(id);
-      // Formateamos el nombre de la rama
       const branchName = formatBranchName(task.type, task.id, task.title);
 
       console.log(pc.cyan(`\nConmutando a la rama: ${pc.bold(branchName)}`));
-      // Cambiamos a la rama o la creamos si no existe
       const res = checkoutBranch(branchName, { createIfNotExists: true });
 
       if (res.created) {
@@ -457,5 +448,4 @@ program
     }
   });
 
-// Parseamos los argumentos recibidos por la línea de comandos
 program.parse(process.argv);
