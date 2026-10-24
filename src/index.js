@@ -24,3 +24,6 @@ export * from './project-root.js';
 
 // Exportamos el cálculo de la siguiente acción del flujo (next_step)
 export * from './next-step.js';
+
+// Exportamos el hook Stop para clientes como Claude Code (no terminar hasta completar el plan)
+export * from './stop-hook.js';

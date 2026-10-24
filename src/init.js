@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { installStopHook } from './stop-hook.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -252,6 +253,14 @@ exit 0
     }
   }
 
+  // 10. Hook Stop de Claude Code: el agente no termina mientras el plan por fases tenga trabajo pendiente
+  let stopHookInstalled = false;
+  try {
+    stopHookInstalled = installStopHook(targetDir).installed;
+  } catch {
+    // Si .claude/settings.json existe pero está malformado, no lo tocamos
+  }
+
   return {
     targetDir,
     copiedFolders,
@@ -259,6 +268,7 @@ exit 0
     ciCreated,
     packageScriptsAdded,
     vscodeTasksCreated,
-    gitHookCreated
+    gitHookCreated,
+    stopHookInstalled
   };
 }

@@ -22,6 +22,7 @@ import {
   runFinalHealthcheck,
   getPhasePlan,
   getNextStep,
+  resumePhasedPlan,
 } from './index.js';
 import { resolveProjectRoot, PROJECT_ROOT_ENV } from './project-root.js';
 
@@ -172,6 +173,7 @@ export const TOOLS = [
           },
         },
         healthCommands: { type: 'object', description: 'Comandos del healthcheck final { gate: comando } (default: pnpm test y pnpm test:bdd)' },
+        maxAttempts: { type: 'number', description: 'Checks fallidos consecutivos antes de bloquear el plan (default 3)' },
       },
       required: ['id', 'title', 'phases'],
     },
@@ -200,6 +202,18 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: { planId: { type: 'string', description: 'ID del plan (default: plan activo)' } },
+      required: [],
+    },
+  },
+  {
+    name: 'resume_phased_plan',
+    description: 'Reanuda un plan bloqueado por límite de intentos. Usar solo cuando un humano lo indique tras revisar el bloqueo.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        planId: { type: 'string', description: 'ID del plan (default: plan activo)' },
+        note: { type: 'string', description: 'Qué se cambió para desbloquear (queda en la bitácora)' },
+      },
       required: [],
     },
   },
@@ -292,14 +306,24 @@ export const TOOL_HANDLERS = {
 
   generate_bdd_scaffold: async ({ id }, cwd) => generateBddScaffold(id, cwd),
 
-  start_phased_plan: async ({ id, title, phases, healthCommands }, cwd) =>
-    startPhasedDevelopment({ id, title, phases, ...(healthCommands ? { healthCommands } : {}), projectRoot: cwd }),
+  start_phased_plan: async ({ id, title, phases, healthCommands, maxAttempts }, cwd) =>
+    startPhasedDevelopment({
+      id,
+      title,
+      phases,
+      ...(healthCommands ? { healthCommands } : {}),
+      ...(maxAttempts ? { maxAttempts } : {}),
+      projectRoot: cwd,
+    }),
 
   check_current_phase: async ({ planId }, cwd) => checkCurrentPhase({ planId: planId || null, projectRoot: cwd }),
 
   run_final_healthcheck: async ({ planId }, cwd) => runFinalHealthcheck({ planId: planId || null, projectRoot: cwd }),
 
   get_phased_plan: async ({ planId }, cwd) => getPhasePlan(planId || null, cwd),
+
+  resume_phased_plan: async ({ planId, note }, cwd) =>
+    resumePhasedPlan({ planId: planId || null, note: note || '', projectRoot: cwd }),
 
   next_step: async ({ planId }, cwd) => getNextStep({ planId: planId || null, projectRoot: cwd }),
 };

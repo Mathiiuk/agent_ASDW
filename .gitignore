@@ -39,3 +39,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Estado efímero del hook Stop del agente
+.agents/workflow/phases/stop-hook.json

@@ -2,7 +2,7 @@ id: AGT-0014
 external_ref: ''
 title: Hook Stop con limite de intentos
 type: feat
-status: IN_PROGRESS
+status: READY_FOR_PR
 priority: medium
 owner: team-agent
 base_branch: main
