@@ -1,4 +1,5 @@
-// Importamos execSync para ejecutar los comandos de los quality gates en la shell
+import fs from 'node:fs';
+import path from 'node:path';
 import { execSync } from 'node:child_process';
 
 /**
@@ -29,9 +30,11 @@ export const VALID_STATUSES = [
  */
 export const VALID_TYPES = [
   'feat',
+  'feature',
   'fix',
   'hotfix',
   'refactor',
+  'redesign',
   'security',
   'test',
   'docs',
@@ -47,7 +50,6 @@ export const VALID_TYPES = [
 export function validateManifest(manifest) {
   const errors = [];
 
-  // Verificamos que el objeto exista
   if (!manifest || typeof manifest !== 'object') {
     return { valid: false, errors: ['El manifiesto es nulo o no es un objeto válido.'] };
   }
@@ -57,9 +59,10 @@ export function validateManifest(manifest) {
     errors.push('El campo obligatorio "id" falta o no es un string.');
   }
 
-  // Validación de campo 'title'
-  if (!manifest.title || typeof manifest.title !== 'string') {
-    errors.push('El campo obligatorio "title" falta o no es un string.');
+  // Validación de campo 'title' (o 'summary')
+  const title = manifest.title || manifest.summary;
+  if (!title || typeof title !== 'string') {
+    errors.push('El campo obligatorio "title" (o "summary") falta o no es un string.');
   }
 
   // Validación de campo 'type'
@@ -77,11 +80,37 @@ export function validateManifest(manifest) {
     errors.push('El campo "quality_gates" debe ser un objeto con los gates requeridos.');
   }
 
-  // Retornamos si es válido y la lista de posibles errores encontrados
   return {
     valid: errors.length === 0,
     errors,
   };
+}
+
+/**
+ * Obtiene el comando por defecto para un quality gate si no está especificado en el manifiesto.
+ */
+function getDefaultGateCommand(gateName, projectRoot) {
+  const hasFrontend = fs.existsSync(path.join(projectRoot, 'frontend', 'package.json'));
+  const prefix = hasFrontend ? 'npm --prefix frontend' : 'npm';
+
+  switch (gateName) {
+    case 'build':
+      return `${prefix} run build`;
+    case 'lint':
+      return `${prefix} run lint`;
+    case 'typecheck':
+      return hasFrontend ? 'node frontend/node_modules/typescript/bin/tsc -b frontend' : 'npx tsc --noEmit';
+    case 'security':
+      return `${prefix} audit`;
+    case 'unit_tests':
+      return `${prefix} test`;
+    case 'integration_tests':
+      return `${prefix} run test:integration`;
+    case 'e2e':
+      return `${prefix} run test:e2e`;
+    default:
+      return null;
+  }
 }
 
 /**
@@ -97,11 +126,9 @@ export function runQualityGates(taskManifest, projectRoot = process.cwd()) {
   const results = [];
   let allPassed = true;
 
-  // Recorremos los quality gates activados en el manifiesto (valor true)
   for (const [gateName, isEnabled] of Object.entries(gates)) {
     if (isEnabled) {
-      // Buscamos el comando asociado al gate (ej: unit_tests -> commands.unit_tests)
-      const command = commands[gateName];
+      const command = commands[gateName] || getDefaultGateCommand(gateName, projectRoot);
 
       if (!command) {
         // Si el gate está activo pero no hay comando asignado, se marca como advertencia/fallo
@@ -110,21 +137,19 @@ export function runQualityGates(taskManifest, projectRoot = process.cwd()) {
           command: 'N/A',
           passed: false,
           output: '',
-          error: `Gate "${gateName}" activado pero no tiene comando configurado en "commands".`,
+          error: `Gate "${gateName}" activado pero no tiene comando configurado ni default.`,
         });
         allPassed = false;
         continue;
       }
 
       try {
-        // Ejecutamos el comando del gate
         const output = execSync(command, {
           cwd: projectRoot,
           encoding: 'utf-8',
           stdio: ['pipe', 'pipe', 'pipe'],
         });
 
-        // Registramos el resultado exitoso
         results.push({
           gate: gateName,
           command,
@@ -132,7 +157,6 @@ export function runQualityGates(taskManifest, projectRoot = process.cwd()) {
           output: output.trim(),
         });
       } catch (err) {
-        // Capturamos la salida de error
         const errorOutput = (err.stdout || '') + '\n' + (err.stderr || '') + '\n' + err.message;
         results.push({
           gate: gateName,
@@ -146,7 +170,6 @@ export function runQualityGates(taskManifest, projectRoot = process.cwd()) {
     }
   }
 
-  // Retornamos el balance general de todos los gates
   return {
     allPassed,
     results,

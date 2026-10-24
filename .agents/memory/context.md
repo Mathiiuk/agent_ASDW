@@ -1,19 +1,22 @@
-# 🧠 Contexto y Memoria del Proyecto: agente_dev
+# 🧠 Contexto y Memoria del Proyecto: agent_ASDW
 
-> **Última sincronización:** 2026-08-29T15:26:51.381Z | **Nodos:** 23 | **Tareas:** 8
+> **Última sincronización:** 2026-09-14T12:11:17.382Z | **Nodos:** 31 | **Tareas:** 9
 
 ## 📦 Mapa de Módulos y Dependencias
 
 | Módulo | Líneas | Dependencias Principales |
 |---|---|---|
-| `src/git.js` | 162 | node:child_process |
-| `src/index.js` | 18 | ninguna |
-| `src/init.js` | 127 | node:fs, node:path, node:url |
-| `src/memory.js` | 308 | node:fs, node:path, ./task-manager.js |
-| `src/task-manager.js` | 294 | node:fs, node:path, js-yaml |
-| `src/validator.js` | 155 | node:child_process |
+| `bin/agente-dev.js` | 462 | commander, picocolors, ../src/index.js |
+| `src/memory.js` | 336 | node:fs, node:path, ./task-manager.js |
+| `src/task-manager.js` | 300 | node:fs, node:path, js-yaml |
+| `src/init.js` | 262 | node:fs, node:path, node:url |
+| `src/mcp-server.js` | 248 | @modelcontextprotocol/sdk/server/index.js, @modelcontextprotocol/sdk/server/stdio.js, @modelcontextprotocol/sdk/types.js |
+| `src/validator.js` | 187 | node:fs, node:path, node:child_process |
+| `src/git.js` | 176 | node:child_process |
 | `src/workflow-runner.js` | 169 | node:fs, node:path, ./task-manager.js |
-| `bin/agente-dev.js` | 378 | commander, picocolors, ../src/index.js |
+| `src/release-manager.js` | 105 | node:fs, node:path, js-yaml |
+| `src/scaffolder.js` | 85 | node:fs, node:path, @cucumber/cucumber |
+| `src/index.js` | 27 | ninguna |
 
 ## 📋 Tareas Registradas
 
@@ -25,6 +28,7 @@
 - **AGT-0006: Implementacion Completa de CI/CD con GitHub Actions y Quality Gates Automatizados** `[READY_FOR_PR]`
 - **AGT-0007: Implementacion de Memoria Graphify para Ahorro de Tokens y Aprendizaje de Errores** `[READY_FOR_PR]`
 - **AGT-0008: Fix compatibilidad CI CD pnpm v11 con Node 22 y 24** `[READY_FOR_PR]`
+- **AGT-0010: Integracion de MCP, Release Manager y BDD Scaffolder** `[PLANNED]`
 
 ## 💡 Lecciones Aprendidas y Anti-Patrones a Evitar
 

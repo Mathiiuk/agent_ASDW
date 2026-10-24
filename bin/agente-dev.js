@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
-// Importamos la librería Commander para gestionar los argumentos y comandos de la CLI
 import { Command } from 'commander';
-// Importamos picocolors para formatear y colorear la salida en la terminal
 import pc from 'picocolors';
-// Importamos las funciones del núcleo de nuestro agente
 import {
   createTask,
   getTask,
@@ -41,10 +38,8 @@ function collect(value, previous) {
   return previous.concat([value]);
 }
 
-// Inicializamos el programa CLI
 const program = new Command();
 
-// Configuramos metadatos básicos de la CLI
 program
   .name('agt')
   .description('CLI del Agente de Workflow Autónomo - Orquestador de Tareas y Ramas Git')
@@ -62,7 +57,7 @@ program
   .action((options) => {
     try {
       const cwd = process.cwd();
-      console.log(pc.cyan(`\n🤖 [Agente Workflow] Inicializando ecosistema en: ${pc.bold(cwd)}...`));
+      console.log(pc.cyan(`\nInicializando en: ${pc.bold(cwd)}`));
 
       const result = initProject({
         targetDir: cwd,
@@ -70,20 +65,20 @@ program
         copyCi: options.ci !== false,
       });
 
-      console.log(pc.green(`✔ ¡Proyecto inicializado con éxito!`));
+      console.log(pc.green(`Proyecto inicializado.`));
       console.log(pc.dim('Carpetas configuradas en .agents/:'));
-      result.copiedFolders.forEach((f) => console.log(pc.dim(`  📁 .agents/${f}/`)));
+      result.copiedFolders.forEach((f) => console.log(pc.dim(`  .agents/${f}/`)));
       console.log(pc.dim('Estructura de workflow creada:'));
-      result.createdWorkflowDirs.forEach((w) => console.log(pc.dim(`  📂 .agents/workflow/${w}/`)));
+      result.createdWorkflowDirs.forEach((w) => console.log(pc.dim(`  .agents/workflow/${w}/`)));
 
       if (result.ciCreated) {
-        console.log(pc.cyan(`🚀 Pipeline de CI/CD creado en: ${pc.bold('.github/workflows/ci.yml')}`));
+        console.log(pc.cyan(`Pipeline de CI/CD creado en: ${pc.bold('.github/workflows/ci.yml')}`));
       }
 
-      console.log(pc.yellow('\n👉 Siguiente paso para comenzar tu primera tarea:'));
-      console.log(pc.white(`   agt task:new TSK-0001 -t "Mi primera funcionalidad" --type feat\n`));
+      console.log(pc.yellow('\nSiguiente paso:'));
+      console.log(pc.white(`  agt task:new TSK-0001 -t "Mi primera funcionalidad" --type feat\n`));
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al inicializar el proyecto: ${error.message}\n`));
+      console.error(pc.red(`\nError al inicializar el proyecto: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -102,9 +97,8 @@ program
   .option('--no-branch', 'No crear ni cambiar la rama de Git automáticamente')
   .action((id, options) => {
     try {
-      console.log(pc.cyan(`\n🤖 [Agente Workflow] Creando nueva tarea: ${pc.bold(id)}...`));
+      console.log(pc.cyan(`\nCreando tarea: ${pc.bold(id)}`));
 
-      // Invocamos la función del gestor de tareas
       const result = createTask({
         id,
         title: options.title,
@@ -114,17 +108,17 @@ program
         createBranch: options.branch !== false,
       });
 
-      console.log(pc.green(`✔ Tarea ${pc.bold(id)} creada exitosamente.`));
+      console.log(pc.green(`Tarea ${pc.bold(id)} creada.`));
       console.log(pc.dim('Archivos generados:'));
-      result.files.forEach((file) => console.log(pc.dim(`  📄 ${file}`)));
+      result.files.forEach((file) => console.log(pc.dim(`  ${file}`)));
 
       if (options.branch !== false) {
-        console.log(pc.yellow(`🌿 Rama Git activa: ${pc.bold(result.branch)}`));
+        console.log(pc.yellow(`Rama Git activa: ${pc.bold(result.branch)}`));
       }
 
-      console.log(pc.magenta('\nSiguiente paso: Completa la especificación y el plan en docs/workflow/\n'));
+      console.log(pc.magenta('\nSiguiente paso: completar la especificación y el plan en .agents/workflow/\n'));
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al crear la tarea: ${error.message}\n`));
+      console.error(pc.red(`\nError al crear la tarea: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -138,22 +132,19 @@ program
   .description('Conmuta a la rama de Git correspondiente a la tarea especificada')
   .action((id) => {
     try {
-      // Obtenemos los datos de la tarea existente
       const task = getTask(id);
-      // Formateamos el nombre de la rama
       const branchName = formatBranchName(task.type, task.id, task.title);
 
-      console.log(pc.cyan(`\n🌿 Conmutando a la rama: ${pc.bold(branchName)}...`));
-      // Cambiamos a la rama o la creamos si no existe
+      console.log(pc.cyan(`\nConmutando a la rama: ${pc.bold(branchName)}`));
       const res = checkoutBranch(branchName, { createIfNotExists: true });
 
       if (res.created) {
-        console.log(pc.green(`✔ Rama creada y conmutada: ${pc.bold(branchName)}\n`));
+        console.log(pc.green(`Rama creada y conmutada: ${pc.bold(branchName)}\n`));
       } else {
-        console.log(pc.green(`✔ Conmutado a la rama existente: ${pc.bold(branchName)}\n`));
+        console.log(pc.green(`Conmutado a la rama existente: ${pc.bold(branchName)}\n`));
       }
     } catch (error) {
-      console.error(pc.red(`\n✖ Error con la rama Git: ${error.message}\n`));
+      console.error(pc.red(`\nError con la rama Git: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -167,18 +158,18 @@ program
   .description('Ejecuta los Quality Gates configurados en el manifiesto de la tarea')
   .action((id) => {
     try {
-      console.log(pc.cyan(`\n🛡️ [Quality Gates] Verificando tarea: ${pc.bold(id)}...`));
+      console.log(pc.cyan(`\nVerificando tarea: ${pc.bold(id)}`));
       const task = getTask(id);
 
       // 1. Validar estructura del manifiesto
       const validation = validateManifest(task);
       if (!validation.valid) {
-        console.log(pc.red('✖ Errores en la estructura del manifiesto YAML:'));
+        console.log(pc.red('Errores en la estructura del manifiesto YAML:'));
         validation.errors.forEach((err) => console.log(pc.red(`  - ${err}`)));
         process.exit(1);
       }
 
-      console.log(pc.green('✔ Estructura de manifiesto YAML válida.'));
+      console.log(pc.green('Estructura de manifiesto YAML válida.'));
 
       // 2. Ejecutar comandos de Quality Gates
       console.log(pc.cyan('Ejecutando gates activos...'));
@@ -186,9 +177,9 @@ program
 
       for (const item of gatesResult.results) {
         if (item.passed) {
-          console.log(pc.green(`  ✔ [PASS] ${item.gate} -> ${pc.dim(item.command)}`));
+          console.log(pc.green(`  [PASS] ${item.gate} -> ${pc.dim(item.command)}`));
         } else {
-          console.log(pc.red(`  ✖ [FAIL] ${item.gate} -> ${pc.dim(item.command)}`));
+          console.log(pc.red(`  [FAIL] ${item.gate} -> ${pc.dim(item.command)}`));
           if (item.error) {
             console.log(pc.dim(`    ${item.error}`));
           }
@@ -196,13 +187,13 @@ program
       }
 
       if (gatesResult.allPassed) {
-        console.log(pc.green(`\n🎉 Todos los Quality Gates pasaron exitosamente para ${pc.bold(id)}.\n`));
+        console.log(pc.green(`\nTodos los Quality Gates pasaron para ${pc.bold(id)}.\n`));
       } else {
-        console.log(pc.red(`\n⚠️ Algunos Quality Gates fallaron. Revisa los errores antes de continuar.\n`));
+        console.log(pc.red(`\nAlgunos Quality Gates fallaron. Revisa los errores antes de continuar.\n`));
         process.exit(1);
       }
     } catch (error) {
-      console.error(pc.red(`\n✖ Error en verificación: ${error.message}\n`));
+      console.error(pc.red(`\nError en verificación: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -218,18 +209,19 @@ program
     try {
       const tasks = listTasks();
       if (tasks.length === 0) {
-        console.log(pc.yellow('\nNo hay tareas registradas en docs/workflow/tasks/.\n'));
+        console.log(pc.yellow('\nNo hay tareas registradas en .agents/workflow/tasks/.\n'));
         return;
       }
 
-      console.log(pc.cyan(`\n📋 Tareas registradas (${tasks.length}):\n`));
+      console.log(pc.cyan(`\nTareas registradas (${tasks.length}):\n`));
       for (const t of tasks) {
         const statusColor = t.status === 'DONE' ? pc.green : t.status === 'IN_PROGRESS' ? pc.yellow : pc.blue;
-        console.log(`  ${pc.bold(t.id.padEnd(12))} [${statusColor(t.status.padEnd(12))}] ${pc.white(t.title)} (${pc.dim(t.type)})`);
+        const displayTitle = (t.title || t.summary || 'Sin título').substring(0, 65);
+        console.log(`  ${pc.bold(t.id.padEnd(12))} [${statusColor(t.status.padEnd(12))}] ${pc.white(displayTitle)} (${pc.dim(t.type)})`);
       }
       console.log();
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al listar tareas: ${error.message}\n`));
+      console.error(pc.red(`\nError al listar tareas: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -245,13 +237,13 @@ program
     try {
       if (newStatus) {
         const updated = updateTaskStatus(id, newStatus.toUpperCase());
-        console.log(pc.green(`\n✔ Estado de ${pc.bold(id)} actualizado a: ${pc.bold(updated.status)}\n`));
+        console.log(pc.green(`\nEstado de ${pc.bold(id)} actualizado a: ${pc.bold(updated.status)}\n`));
       } else {
         const task = getTask(id);
         console.log(pc.cyan(`\nTarea: ${pc.bold(task.id)} | Estado actual: ${pc.yellow(task.status)}\n`));
       }
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al procesar estado: ${error.message}\n`));
+      console.error(pc.red(`\nError al procesar estado: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -268,7 +260,7 @@ program
   .action(async (id, options) => {
     try {
       const maxRetries = parseInt(options.maxRetries, 10) || 3;
-      console.log(pc.cyan(`\n🔄 [Self-Healing Loop] Iniciando bucle para tarea: ${pc.bold(id)} (Máx. reintentos: ${maxRetries})...`));
+      console.log(pc.cyan(`\nIniciando bucle para tarea: ${pc.bold(id)} (máx. reintentos: ${maxRetries})`));
 
       const loopResult = await runTaskLoop({
         id,
@@ -278,10 +270,10 @@ program
       console.log(pc.dim(`\nReporte generado en: ${loopResult.reportPath}`));
 
       if (loopResult.success) {
-        console.log(pc.green(`\n🎉 [ÉXITO] Todos los Quality Gates pasaron en ${loopResult.iterations} iteración(es).`));
+        console.log(pc.green(`\nÉxito: todos los Quality Gates pasaron en ${loopResult.iterations} iteración(es).`));
         console.log(pc.yellow(`Estado de ${pc.bold(id)} actualizado a: READY_FOR_PR\n`));
       } else {
-        console.log(pc.red(`\n⚠️ [FALLO] No se superaron los Quality Gates tras ${loopResult.iterations} iteración(es).`));
+        console.log(pc.red(`\nFallo: no se superaron los Quality Gates tras ${loopResult.iterations} iteración(es).`));
         if (loopResult.diagnostics.length > 0) {
           console.log(pc.yellow('\nDiagnóstico de causas:'));
           loopResult.diagnostics.forEach((d) => {
@@ -292,7 +284,7 @@ program
         process.exit(1);
       }
     } catch (error) {
-      console.error(pc.red(`\n✖ Error en bucle autónomo: ${error.message}\n`));
+      console.error(pc.red(`\nError en bucle autónomo: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -307,19 +299,19 @@ program
   .description('Escanea el código y reconstruye el grafo de conocimiento (.agents/memory/)')
   .action(() => {
     try {
-      console.log(pc.cyan('\n🧠 [Graphify Memory] Sincronizando grafo de conocimiento del proyecto...'));
+      console.log(pc.cyan('\nSincronizando grafo de conocimiento...'));
       const graph = buildKnowledgeGraph();
 
-      console.log(pc.green('✔ Grafo de memoria sincronizado exitosamente.'));
-      console.log(pc.white(`  📦 Nodos mapeados: ${pc.bold(graph.metrics.totalNodes)}`));
-      console.log(pc.white(`  🔗 Dependencias/Aristas: ${pc.bold(graph.metrics.totalEdges)}`));
-      console.log(pc.white(`  📋 Tareas indexadas: ${pc.bold(graph.metrics.totalTasks)}`));
-      console.log(pc.white(`  💡 Lecciones registradas: ${pc.bold(graph.metrics.totalLessons)}`));
+      console.log(pc.green('Grafo de memoria sincronizado.'));
+      console.log(pc.white(`  Nodos mapeados: ${pc.bold(graph.metrics.totalNodes)}`));
+      console.log(pc.white(`  Dependencias/Aristas: ${pc.bold(graph.metrics.totalEdges)}`));
+      console.log(pc.white(`  Tareas indexadas: ${pc.bold(graph.metrics.totalTasks)}`));
+      console.log(pc.white(`  Lecciones registradas: ${pc.bold(graph.metrics.totalLessons)}`));
       console.log(pc.dim('\nArchivos actualizados:'));
-      console.log(pc.dim('  📄 .agents/memory/graph.json'));
-      console.log(pc.dim('  📄 .agents/memory/context.md\n'));
+      console.log(pc.dim('  .agents/memory/graph.json'));
+      console.log(pc.dim('  .agents/memory/context.md\n'));
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al sincronizar memoria: ${error.message}\n`));
+      console.error(pc.red(`\nError al sincronizar memoria: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -331,18 +323,20 @@ program
 program
   .command('memory:query <keyword>')
   .description('Consulta contexto y dependencias relevantes en el grafo de memoria')
-  .action((keyword) => {
+  .option('-l, --limit <n>', 'Máximo de coincidencias por categoría', '15')
+  .action((keyword, options) => {
     try {
-      console.log(pc.cyan(`\n🔍 [Graphify Memory] Buscando contexto para: ${pc.bold(keyword)}...\n`));
-      const res = queryMemory(keyword);
+      const limit = parseInt(options.limit, 10) || 15;
+      console.log(pc.cyan(`\nBuscando contexto para: ${pc.bold(keyword)}\n`));
+      const res = queryMemory(keyword, process.cwd(), limit);
 
       if (res.matchedNodes.length === 0 && res.matchedLessons.length === 0) {
-        console.log(pc.yellow(`No se encontraron coincidencias directas para "${keyword}".\n`));
+        console.log(pc.yellow(`Sin coincidencias para "${keyword}".\n`));
         return;
       }
 
       if (res.matchedNodes.length > 0) {
-        console.log(pc.green(`📦 Módulos/Nodos Coincidentes (${res.matchedNodes.length}):`));
+        console.log(pc.green(`Módulos/Nodos coincidentes (${res.matchedNodes.length} de ${res.totalMatches.nodes}):`));
         res.matchedNodes.forEach((n) => {
           console.log(`  - ${pc.bold(n.id)} [${pc.dim(n.type)}]`);
         });
@@ -350,14 +344,18 @@ program
       }
 
       if (res.matchedLessons.length > 0) {
-        console.log(pc.yellow(`💡 Lecciones y Trampas Conocidas (${res.matchedLessons.length}):`));
+        console.log(pc.yellow(`Lecciones y trampas conocidas (${res.matchedLessons.length} de ${res.totalMatches.lessons}):`));
         res.matchedLessons.forEach((l) => {
           console.log(`  - [${l.category}] ${pc.white(l.lesson)} -> ${pc.dim(l.solution)}`);
         });
         console.log();
       }
+
+      if (res.truncated) {
+        console.log(pc.dim(`Resultado recortado a ${limit} por categoría. Usa --limit para ver más.\n`));
+      }
     } catch (error) {
-      console.error(pc.red(`\n✖ Error en consulta de memoria: ${error.message}\n`));
+      console.error(pc.red(`\nError en consulta de memoria: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -380,15 +378,15 @@ program
         solution: options.solution,
       });
 
-      console.log(pc.green(`\n✔ Lección registrada en memoria: [${entry.id}]`));
+      console.log(pc.green(`\nLección registrada: [${entry.id}]`));
       console.log(pc.white(`  Categoría: ${entry.category}`));
       console.log(pc.white(`  Lección: ${entry.lesson}`));
       if (entry.solution) {
         console.log(pc.dim(`  Solución: ${entry.solution}`));
       }
-      console.log(pc.dim('\nGrafo de memoria y context.md sincronizados automáticamente.\n'));
+      console.log(pc.dim('\nGrafo de memoria y context.md sincronizados.\n'));
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al registrar lección: ${error.message}\n`));
+      console.error(pc.red(`\nError al registrar lección: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -402,15 +400,15 @@ program
   .description('Genera una release, actualizando CHANGELOG.md y package.json')
   .action((version) => {
     try {
-      console.log(pc.cyan(`\n📦 Generando Release: ${pc.bold(version)}...`));
+      console.log(pc.cyan(`\nGenerando release: ${pc.bold(version)}`));
       const res = generateRelease(version);
 
       if (!res.success) {
-        console.log(pc.yellow(`\n⚠️  ${res.message}\n`));
+        console.log(pc.yellow(`\n${res.message}\n`));
         return;
       }
 
-      console.log(pc.green(`\n✔ Release ${pc.bold(res.version)} completado.`));
+      console.log(pc.green(`\nRelease ${pc.bold(res.version)} completada.`));
       console.log(pc.white(`  Tareas procesadas: ${res.tasksCount}`));
       console.log(pc.dim(`  Changelog actualizado en: ${res.changelogPath}`));
       if (res.pkgUpdated) {
@@ -418,7 +416,7 @@ program
       }
       console.log();
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al generar release: ${error.message}\n`));
+      console.error(pc.red(`\nError al generar release: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -432,19 +430,19 @@ program
   .description('Genera el código base de Cucumber (JS) desde un archivo .feature')
   .action((id) => {
     try {
-      console.log(pc.cyan(`\n🔨 Generando Scaffold BDD para: ${pc.bold(id)}...`));
+      console.log(pc.cyan(`\nGenerando scaffold BDD para: ${pc.bold(id)}`));
       const res = generateBddScaffold(id);
 
       if (!res.success) {
-        console.log(pc.yellow(`\n⚠️  ${res.message}\n`));
+        console.log(pc.yellow(`\n${res.message}\n`));
         return;
       }
 
-      console.log(pc.green(`\n✔ Scaffold generado exitosamente.`));
+      console.log(pc.green(`\nScaffold generado.`));
       console.log(pc.white(`  Pasos extraídos: ${res.stepsCount}`));
       console.log(pc.dim(`  Archivo creado en: ${res.filePath}\n`));
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al generar scaffolding: ${error.message}\n`));
+      console.error(pc.red(`\nError al generar scaffolding: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -596,5 +594,4 @@ program
     }
   });
 
-// Parseamos los argumentos recibidos por la línea de comandos
 program.parse(process.argv);

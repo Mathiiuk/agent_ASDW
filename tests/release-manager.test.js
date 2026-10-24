@@ -4,7 +4,6 @@ import path from 'node:path';
 import { generateRelease } from '../src/release-manager.js';
 import * as taskManager from '../src/task-manager.js';
 
-// Mockeamos el sistema de archivos y el task-manager
 vi.mock('node:fs');
 vi.mock('../src/task-manager.js');
 

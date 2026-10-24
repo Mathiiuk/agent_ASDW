@@ -1,4 +1,3 @@
-// Importamos la función execSync del módulo child_process para ejecutar comandos de Git en la terminal del sistema operativo
 import { execSync } from 'node:child_process';
 
 /**
@@ -15,15 +14,10 @@ export function slugify(text) {
   }
 
   return text
-    // Convertimos todo el texto a minúsculas
     .toLowerCase()
-    // Normalizamos caracteres Unicode para separar letras de sus acentos/diacríticos (NFD)
     .normalize('NFD')
-    // Eliminamos los caracteres diacríticos (marcas de acento como tildes)
     .replace(/[\u0300-\u036f]/g, '')
-    // Reemplazamos cualquier caracter que no sea alfanumérico por un guion
     .replace(/[^a-z0-9]+/g, '-')
-    // Eliminamos guiones al inicio o al final de la cadena
     .replace(/^-+|-+$/g, '');
 }
 
@@ -38,17 +32,13 @@ export function slugify(text) {
  * @returns {string} - Nombre formateado de la rama Git
  */
 export function formatBranchName(type, id, title) {
-  // Normalizamos el tipo de tarea por defecto a 'feat' si no se especifica
   const branchType = (type || 'feat').toLowerCase();
-  // Limpiamos el identificador eliminando espacios
   const cleanId = (id || 'TASK').trim();
-  // Generamos el slug a partir del título
   const slug = slugify(title);
 
   // Si hay slug, lo concatenamos al ID; de lo contrario solo usamos el ID
   const branchSuffix = slug ? `${cleanId}-${slug}` : cleanId;
 
-  // Retornamos el nombre completo de la rama
   return `${branchType}/${branchSuffix}`;
 }
 
@@ -60,7 +50,6 @@ export function formatBranchName(type, id, title) {
  * @returns {string} - Salida estándar en texto limpio
  */
 function runGit(command, cwd = process.cwd()) {
-  // Ejecutamos el comando y capturamos stdout como string codificado en UTF-8
   return execSync(command, {
     cwd,
     encoding: 'utf-8',
@@ -76,7 +65,6 @@ function runGit(command, cwd = process.cwd()) {
  */
 export function isGitRepo(cwd = process.cwd()) {
   try {
-    // Consultamos si estamos dentro de un árbol de trabajo de Git
     const output = runGit('git rev-parse --is-inside-work-tree', cwd);
     return output === 'true';
   } catch {
@@ -92,7 +80,6 @@ export function isGitRepo(cwd = process.cwd()) {
  * @returns {string} - Nombre de la rama activa (ej: 'main' o 'feat/AGT-0001')
  */
 export function getCurrentBranch(cwd = process.cwd()) {
-  // Consultamos la rama actual mediante git branch --show-current
   let branch = runGit('git branch --show-current', cwd);
   
   // Fallback para entornos CI en "detached HEAD" (ej. GitHub Actions)
@@ -117,7 +104,6 @@ export function getCurrentBranch(cwd = process.cwd()) {
  * @returns {boolean} - True si hay cambios pendientes, False si está limpio
  */
 export function hasUncommittedChanges(cwd = process.cwd()) {
-  // Ejecutamos git status en formato corto
   const status = runGit('git status --short', cwd);
   // Si la salida no está vacía, existen cambios sin confirmar
   return status.length > 0;
@@ -132,7 +118,6 @@ export function hasUncommittedChanges(cwd = process.cwd()) {
  */
 export function branchExists(branchName, cwd = process.cwd()) {
   try {
-    // Intentamos verificar la referencia de la rama local
     runGit(`git rev-parse --verify refs/heads/${branchName}`, cwd);
     return true;
   } catch {
@@ -150,7 +135,6 @@ export function branchExists(branchName, cwd = process.cwd()) {
  * @returns {{ success: boolean, branch: string, created: boolean }} - Resultado de la operación
  */
 export function checkoutBranch(branchName, { createIfNotExists = true, cwd = process.cwd() } = {}) {
-  // Verificamos si la rama ya existe localmente
   const exists = branchExists(branchName, cwd);
 
   // Si ya estamos en esa misma rama, no hacemos nada adicional

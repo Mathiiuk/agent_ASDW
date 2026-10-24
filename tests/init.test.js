@@ -1,17 +1,13 @@
-// Importamos las utilidades de testing de Vitest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-// Importamos módulos de sistema de archivos para crear entornos temporales de prueba
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-// Importamos la función a probar
 import { initProject } from '../src/init.js';
 
 describe('Módulo de Inicialización de Proyectos (src/init.js)', () => {
   let tempProjectDir;
 
   beforeEach(() => {
-    // Creamos un directorio temporal simulando un proyecto externo nuevo
     tempProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'external-app-'));
   });
 
@@ -27,12 +23,10 @@ describe('Módulo de Inicialización de Proyectos (src/init.js)', () => {
       copyCucumber: true,
     });
 
-    // Verificamos que se hayan copiado las subcarpetas esenciales
     expect(result.copiedFolders).toContain('rules');
     expect(result.copiedFolders).toContain('skills');
     expect(result.copiedFolders).toContain('templates');
 
-    // Verificamos la existencia física de las carpetas y archivos en el destino
     const targetRules = path.join(tempProjectDir, '.agents', 'rules', 'master-workflow.md');
     const targetTemplates = path.join(tempProjectDir, '.agents', 'templates', 'feature.feature');
     const targetCucumber = path.join(tempProjectDir, 'cucumber.json');
@@ -44,7 +38,6 @@ describe('Módulo de Inicialización de Proyectos (src/init.js)', () => {
     expect(fs.existsSync(targetCi)).toBe(true);
     expect(result.ciCreated).toBe(true);
 
-    // Verificamos la creación de la estructura limpia de workflow
     const workflowTasks = path.join(tempProjectDir, '.agents', 'workflow', 'tasks');
     const workflowSpecs = path.join(tempProjectDir, '.agents', 'workflow', 'specs');
     const workflowPlans = path.join(tempProjectDir, '.agents', 'workflow', 'plans');

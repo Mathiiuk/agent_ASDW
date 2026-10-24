@@ -36,6 +36,8 @@ El agente opera asumiendo los roles especializados según la naturaleza de la ta
    - GitHub Actions, Docker, pipelines de validación, despliegues y rollback.
 8. **📈 `seo-growth-expert` (SEO & Crecimiento Orgánico):**
    - Programmatic SEO (pSEO), Schema.org JSON-LD, Core Web Vitals y OpenGraph.
+9. **🪢 `ponytail` (Mínimo cambio completo, transversal):**
+   - Se aplica en toda tarea de código junto al rol que corresponda: el cambio más chico que resuelve el problema completo, sin recortar validación, seguridad ni tests. Nivel por defecto `full`; cambia con `/ponytail lite|full|ultra`.
 
 ---
 
@@ -60,11 +62,11 @@ Cuando el usuario asigne un requerimiento, el agente debe ejecutar las siguiente
 
 1. **Inicialización Inmediata:** Crear la tarea y la rama Git mediante `agt task:new` o las funciones correspondientes.
 2. **Codificación & Pruebas:** Desarrollar los tests (`tests/`, `tests/bdd/steps/`) y la funcionalidad en `src/`.
-3. **Ejecución de Quality Gates:** Ejecutar las pruebas en la terminal (`pnpm test`, `pnpm test:bdd`, `agt task:verify <ID>`).
+3. **Ejecución de Quality Gates:** Ejecutar las pruebas en la terminal (`pnpm test`, `pnpm test:bdd`, `agt task:verify <ID>`) o, si el cliente está conectado por MCP (`agt mcp`), invocar directamente la tool `verify_task_quality_gates`.
 4. **Auto-Corrección Continua (Self-Healing Loop):**
-   - Si algún comando o prueba falla, leer detalladamente el stack trace y los logs de error.
-   - Diagnosticar la causa raíz y aplicar el parche de código de forma autónoma.
-   - Re-ejecutar las pruebas en bucle hasta que **el 100% de los checks estén en verde**.
+   - Invocar la tool MCP `run_self_healing_loop` (o `agt task:loop <ID>` en terminal). Esta herramienta **no corrige código por sí misma**: ejecuta los gates y devuelve un diagnóstico estructurado (`{ gate, category, suggestion }` por cada fallo).
+   - El agente de IA es quien lee ese diagnóstico, localiza la causa raíz en el código fuente y aplica el parche de forma autónoma con sus propias herramientas de edición.
+   - Volver a invocar `run_self_healing_loop` / `verify_task_quality_gates` tras cada corrección, en bucle, hasta que **el 100% de los checks estén en verde**.
 5. **Cierre y Notificación:** Crear el reporte de ejecución en `.agents/workflow/executions/<ID>.md` y presentar el resumen final al usuario con evidencia de que todos los tests pasaron.
 
 ---

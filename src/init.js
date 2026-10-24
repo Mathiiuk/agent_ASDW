@@ -1,9 +1,7 @@
-// Importamos los módulos nativos de Node.js para manejo de archivos, rutas y URLs de módulos ESM
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Obtenemos la ruta del archivo actual (__filename) y del directorio (__dirname) en ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -22,7 +20,6 @@ function copyDirRecursive(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
   }
 
-  // Leemos todas las entradas del directorio origen
   const entries = fs.readdirSync(src, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -53,7 +50,6 @@ export function initProject({ targetDir = process.cwd(), copyCucumber = true, co
   const sourceAgentsDir = path.join(PACKAGE_ROOT, '.agents');
   const targetAgentsDir = path.join(targetDir, '.agents');
 
-  // Validamos que el paquete contenga la carpeta .agents de origen
   if (!fs.existsSync(sourceAgentsDir)) {
     throw new Error(`No se encontró la carpeta base .agents en el paquete: ${sourceAgentsDir}`);
   }
@@ -248,7 +244,6 @@ exit 0
     }
   }
 
-  // Retornamos el balance de lo copiado e inicializado
   return {
     targetDir,
     copiedFolders,

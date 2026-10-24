@@ -1,24 +1,19 @@
-// Importamos las utilidades de testing de Vitest
 import { describe, it, expect } from 'vitest';
-// Importamos las funciones del módulo de Git a probar
 import { slugify, formatBranchName, isGitRepo, getCurrentBranch } from '../src/git.js';
 
 describe('Módulo de Git (src/git.js)', () => {
   describe('slugify()', () => {
     it('debe convertir texto simple con espacios en minúsculas y guiones', () => {
-      // Verificamos que una frase común se convierta a slug
       const resultado = slugify('Mi Nueva Tarea de Prueba');
       expect(resultado).toBe('mi-nueva-tarea-de-prueba');
     });
 
     it('debe remover acentos y caracteres diacríticos correctamente', () => {
-      // Verificamos manejo de acentos en español (á, é, í, ó, ú, ñ)
       const resultado = slugify('Configuración de Autenticación y Verificación');
       expect(resultado).toBe('configuracion-de-autenticacion-y-verificacion');
     });
 
     it('debe eliminar caracteres especiales y puntuación', () => {
-      // Verificamos caracteres como !, ?, $, %, #
       const resultado = slugify('Fix: Error al guardar datos en BD #123 (Urgente!)');
       expect(resultado).toBe('fix-error-al-guardar-datos-en-bd-123-urgente');
     });

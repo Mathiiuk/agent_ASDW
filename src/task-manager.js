@@ -1,9 +1,6 @@
-// Importamos los módulos nativos de Node.js para manejo de sistema de archivos y rutas
 import fs from 'node:fs';
 import path from 'node:path';
-// Importamos js-yaml para leer y serializar documentos YAML de manifiestos
 import yaml from 'js-yaml';
-// Importamos las funciones de ayuda de Git desarrolladas en nuestro módulo src/git.js
 import { formatBranchName, checkoutBranch, isGitRepo } from './git.js';
 
 /**
@@ -25,7 +22,6 @@ const DIRS = {
  * @param {string} projectRoot - Directorio raíz del proyecto
  */
 export function ensureWorkflowDirs(projectRoot = process.cwd()) {
-  // Iteramos sobre cada directorio definido en el objeto DIRS
   for (const dirKey of Object.keys(DIRS)) {
     const fullPath = path.join(projectRoot, DIRS[dirKey]);
     // Si la carpeta no existe, la creamos de manera recursiva
@@ -43,7 +39,6 @@ export function ensureWorkflowDirs(projectRoot = process.cwd()) {
  * @returns {string} - Contenido de la plantilla
  */
 function readTemplate(templateName, projectRoot = process.cwd()) {
-  // Construimos la ruta absoluta hacia el archivo de plantilla
   const templatePath = path.join(projectRoot, DIRS.templates, templateName);
   // Si existe el archivo, lo leemos en texto plano codificado en UTF-8
   if (fs.existsSync(templatePath)) {
@@ -76,16 +71,13 @@ export function createTask({
   createBranch = true,
   projectRoot = process.cwd(),
 }) {
-  // Validamos que se proporcione un identificador de tarea
   if (!id) {
     throw new Error('El ID de la tarea es obligatorio (ej: AGT-0002).');
   }
-  // Validamos que se proporcione un título descriptivo
   if (!title) {
     throw new Error('El título de la tarea es obligatorio.');
   }
 
-  // Aseguramos que los directorios destino existan
   ensureWorkflowDirs(projectRoot);
 
   // Lista para almacenar las rutas de los archivos generados
@@ -93,7 +85,6 @@ export function createTask({
 
   // 1. GENERACIÓN DEL MANIFIESTO YAML (docs/workflow/tasks/<ID>.yml)
   const taskYamlPath = path.join(projectRoot, DIRS.tasks, `${id}.yml`);
-  // Definimos la estructura del manifiesto en formato de objeto JavaScript
   const manifestData = {
     id: id,
     external_ref: '',
@@ -133,20 +124,16 @@ export function createTask({
     },
   };
 
-  // Convertimos el objeto JavaScript a texto en formato YAML
   const yamlContent = yaml.dump(manifestData, { indent: 2 });
-  // Guardamos el archivo YAML en disco
   fs.writeFileSync(taskYamlPath, yamlContent, 'utf-8');
   createdFiles.push(taskYamlPath);
 
   // 2. GENERACIÓN DE LA ESPECIFICACIÓN (docs/workflow/specs/<ID>.md)
   const specPath = path.join(projectRoot, DIRS.specs, `${id}.md`);
-  // Leemos la plantilla o usamos una estructura base
   let specTemplate = readTemplate('specification.md', projectRoot);
   if (!specTemplate) {
     specTemplate = `# Especificación: ${id} - ${title}\n\n## 1. Problema y Objetivo\n\n## 2. Requerimientos\n\n## 3. Criterios de Aceptación\n`;
   } else {
-    // Reemplazamos los marcadores de posición con los datos de la tarea
     specTemplate = specTemplate
       .replace(/<TASK-ID>/g, id)
       .replace(/<TITULO_DE_LA_TAREA>/g, title);
@@ -194,14 +181,12 @@ export function createTask({
   createdFiles.push(featurePath);
 
   // 6. AUTOMATIZACIÓN DE RAMA GIT
-  // Calculamos el nombre estandarizado de la rama: <type>/<id>-<slug>
   const branchName = formatBranchName(type, id, title);
   let branchResult = { created: false, branch: branchName };
 
   // Si se solicitó crear la rama y estamos en un repositorio de Git válido
   if (createBranch && isGitRepo(projectRoot)) {
     try {
-      // Conmutamos o creamos la nueva rama de Git
       branchResult = checkoutBranch(branchName, { createIfNotExists: true, cwd: projectRoot });
     } catch (gitErr) {
       // Si falla Git, registramos la advertencia pero no abortamos la creación de los archivos
@@ -209,7 +194,6 @@ export function createTask({
     }
   }
 
-  // Retornamos el resultado con los artefactos creados y el estado de la rama
   return {
     id,
     branch: branchName,
@@ -226,50 +210,52 @@ export function createTask({
  * @returns {object} - Objeto JavaScript con los datos del manifiesto
  */
 export function getTask(id, projectRoot = process.cwd()) {
-  // Construimos la ruta al manifiesto YAML
-  const taskYamlPath = path.join(projectRoot, DIRS.tasks, `${id}.yml`);
-  // Si no existe, arrojamos un error explicativo
+  let taskYamlPath = path.join(projectRoot, DIRS.tasks, `${id}.yml`);
   if (!fs.existsSync(taskYamlPath)) {
-    throw new Error(`No se encontró el manifiesto para la tarea '${id}' en ${taskYamlPath}`);
+    const fallbackPath = path.join(projectRoot, 'docs', 'workflow', 'tasks', `${id}.yml`);
+    if (fs.existsSync(fallbackPath)) {
+      taskYamlPath = fallbackPath;
+    } else {
+      throw new Error(`No se encontró el manifiesto para la tarea '${id}' en ${taskYamlPath}`);
+    }
   }
 
-  // Leemos y parseamos el contenido YAML
   const fileContent = fs.readFileSync(taskYamlPath, 'utf-8');
   return yaml.load(fileContent);
 }
 
 /**
- * Obtiene la lista completa de todas las tareas presentes en docs/workflow/tasks/.
+ * Obtiene la lista completa de todas las tareas presentes en .agents/workflow/tasks/ o docs/workflow/tasks/.
  * 
  * @param {string} projectRoot - Directorio raíz del proyecto
  * @returns {Array<object>} - Colección de tareas con su metadata
  */
 export function listTasks(projectRoot = process.cwd()) {
-  const tasksDir = path.join(projectRoot, DIRS.tasks);
-  // Si el directorio no existe, retornamos una lista vacía
-  if (!fs.existsSync(tasksDir)) {
-    return [];
-  }
+  const dirsToSearch = [
+    path.join(projectRoot, DIRS.tasks),
+    path.join(projectRoot, 'docs', 'workflow', 'tasks'),
+  ];
 
-  // Leemos todos los archivos con extensión .yml o .yaml
-  const files = fs.readdirSync(tasksDir).filter((file) => file.endsWith('.yml') || file.endsWith('.yaml'));
+  const tasksMap = new Map();
 
-  const tasks = [];
-  // Recorremos cada archivo de manifiesto
-  for (const file of files) {
-    try {
-      const filePath = path.join(tasksDir, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const data = yaml.load(content);
-      if (data && data.id) {
-        tasks.push(data);
+  for (const dir of dirsToSearch) {
+    if (!fs.existsSync(dir)) continue;
+
+    const files = fs.readdirSync(dir).filter((file) => file.endsWith('.yml') || file.endsWith('.yaml'));
+    for (const file of files) {
+      try {
+        const filePath = path.join(dir, file);
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data = yaml.load(content);
+        if (data && data.id && !tasksMap.has(data.id)) {
+          tasksMap.set(data.id, data);
+        }
+      } catch {
       }
-    } catch {
-      // Ignoramos archivos corruptos o ilegibles
     }
   }
 
-  // Retornamos la lista ordenada por ID
+  const tasks = Array.from(tasksMap.values());
   return tasks.sort((a, b) => a.id.localeCompare(b.id));
 }
 
@@ -283,11 +269,8 @@ export function listTasks(projectRoot = process.cwd()) {
  */
 export function updateTaskStatus(id, newStatus, projectRoot = process.cwd()) {
   const taskYamlPath = path.join(projectRoot, DIRS.tasks, `${id}.yml`);
-  // Obtenemos los datos actuales
   const taskData = getTask(id, projectRoot);
-  // Actualizamos el campo status
   taskData.status = newStatus;
-  // Guardamos nuevamente el archivo serializado en YAML
   fs.writeFileSync(taskYamlPath, yaml.dump(taskData, { indent: 2 }), 'utf-8');
   return taskData;
 }

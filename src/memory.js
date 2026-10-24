@@ -1,7 +1,5 @@
-// Importamos módulos nativos de sistema de archivos y rutas
 import fs from 'node:fs';
 import path from 'node:path';
-// Importamos funciones del gestor de tareas
 import { listTasks } from './task-manager.js';
 
 /**
@@ -61,7 +59,6 @@ function scanFiles(dir, extensions = ['.js', '.ts', '.jsx', '.tsx', '.json', '.f
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
-    // Ignoramos node_modules, .git, dist, build, .next, etc.
     if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'build' || entry.name === '.next' || entry.name === 'coverage') {
       continue;
     }
@@ -120,7 +117,6 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
 
     nodes.push(node);
 
-    // Creamos aristas de dependencia
     for (const imp of imports) {
       edges.push({
         from: relativePath,
@@ -136,7 +132,7 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
     const taskNodeId = `task:${task.id}`;
     nodes.push({
       id: taskNodeId,
-      label: `${task.id}: ${task.title}`,
+      label: `${task.id}: ${task.title || task.summary || 'Sin título'}`,
       type: 'task',
       status: task.status,
       taskType: task.type,
@@ -174,7 +170,6 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
     lessons,
   };
 
-  // Guardamos graph.json
   const graphFile = path.join(projectRoot, MEMORY_PATHS.graph);
   fs.writeFileSync(graphFile, JSON.stringify(graphData, null, 2), 'utf-8');
 
@@ -198,11 +193,17 @@ function generateCompactContext(graphData, projectRoot = process.cwd()) {
 
   md += `## 📦 Mapa de Módulos y Dependencias\n\n`;
   const modules = graphData.nodes.filter((n) => n.type === 'module' || n.type === 'cli');
+  // (el objetivo del archivo es resumir en pocos tokens, no listar cada archivo).
+  const MAX_MODULES_IN_TABLE = 25;
+  const modulesToList = [...modules].sort((a, b) => b.lineCount - a.lineCount).slice(0, MAX_MODULES_IN_TABLE);
   md += `| Módulo | Líneas | Dependencias Principales |\n`;
   md += `|---|---|---|\n`;
-  for (const mod of modules) {
+  for (const mod of modulesToList) {
     const deps = mod.imports.slice(0, 3).join(', ') || 'ninguna';
     md += `| \`${mod.id}\` | ${mod.lineCount} | ${deps} |\n`;
+  }
+  if (modules.length > modulesToList.length) {
+    md += `\n_(+${modules.length - modulesToList.length} módulos adicionales; consultar con \`memory:query\`)_\n`;
   }
 
   md += `\n## 📋 Tareas Registradas\n\n`;
@@ -268,12 +269,16 @@ export function recordLesson({
 
 /**
  * Realiza una consulta semántica al grafo de memoria para obtener contexto relevante en pocos tokens.
- * 
+ * El resultado se recorta a `limit` coincidencias por categoría: una keyword común en un
+ * proyecto grande puede matchear decenas de nodos, y devolverlos todos sin límite iría
+ * en contra del propósito de "ahorro de tokens" de este sistema.
+ *
  * @param {string} keyword - Palabra clave a buscar (ej: "git", "turnos", "oauth")
  * @param {string} projectRoot - Directorio raíz del proyecto
- * @returns {{ matchedNodes: object[], matchedLessons: object[], relatedEdges: object[] }} - Resultados de la consulta
+ * @param {number} [limit=15] - Máximo de coincidencias a devolver por categoría (nodos/lecciones)
+ * @returns {{ matchedNodes: object[], matchedLessons: object[], relatedEdges: object[], totalMatches: object, truncated: boolean }} - Resultados de la consulta
  */
-export function queryMemory(keyword, projectRoot = process.cwd()) {
+export function queryMemory(keyword, projectRoot = process.cwd(), limit = 15) {
   const graphPath = path.join(projectRoot, MEMORY_PATHS.graph);
 
   // Si no existe el grafo, lo construimos al vuelo
@@ -286,24 +291,37 @@ export function queryMemory(keyword, projectRoot = process.cwd()) {
 
   const lowerKey = (keyword || '').toLowerCase();
 
-  // Filtramos nodos coincidentes
-  const matchedNodes = graphData.nodes.filter(
+  const allMatchedNodes = graphData.nodes.filter(
     (n) => n.id.toLowerCase().includes(lowerKey) || (n.label && n.label.toLowerCase().includes(lowerKey))
   );
 
-  // Filtramos lecciones coincidentes
-  const matchedLessons = graphData.lessons.filter(
+  const allMatchedLessons = graphData.lessons.filter(
     (l) => l.lesson.toLowerCase().includes(lowerKey) || l.category.toLowerCase().includes(lowerKey)
   );
 
-  // Extraemos aristas vinculadas a los nodos encontrados
-  const matchedIds = new Set(matchedNodes.map((n) => n.id));
-  const relatedEdges = graphData.edges.filter((e) => matchedIds.has(e.from) || matchedIds.has(e.to));
+  const matchedIds = new Set(allMatchedNodes.map((n) => n.id));
+  const allRelatedEdges = graphData.edges.filter((e) => matchedIds.has(e.from) || matchedIds.has(e.to));
+
+  // consulta puntual por palabra clave; sólo se necesitan para el grafo completo.
+  const trimNode = (n) => ({ id: n.id, label: n.label, type: n.type, status: n.status, taskType: n.taskType });
+
+  const matchedNodes = allMatchedNodes.slice(0, limit).map(trimNode);
+  const matchedLessons = allMatchedLessons.slice(0, limit);
+  const relatedEdges = allRelatedEdges.slice(0, limit * 2);
 
   return {
     query: keyword,
     matchedNodes,
     matchedLessons,
     relatedEdges,
+    totalMatches: {
+      nodes: allMatchedNodes.length,
+      lessons: allMatchedLessons.length,
+      edges: allRelatedEdges.length,
+    },
+    truncated:
+      matchedNodes.length < allMatchedNodes.length ||
+      matchedLessons.length < allMatchedLessons.length ||
+      relatedEdges.length < allRelatedEdges.length,
   };
 }

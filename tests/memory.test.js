@@ -1,10 +1,7 @@
-// Importamos las utilidades de testing de Vitest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-// Importamos módulos de sistema de archivos para crear entornos temporales de prueba
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-// Importamos las funciones del módulo de memoria
 import { buildKnowledgeGraph, recordLesson, queryMemory } from '../src/memory.js';
 
 describe('Módulo de Memoria y Grafo de Conocimiento (src/memory.js)', () => {
@@ -13,7 +10,6 @@ describe('Módulo de Memoria y Grafo de Conocimiento (src/memory.js)', () => {
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'memory-test-'));
 
-    // Creamos una estructura simulada con src/ y .agents/
     const srcDir = path.join(tempDir, 'src');
     const tasksDir = path.join(tempDir, '.agents', 'workflow', 'tasks');
     fs.mkdirSync(srcDir, { recursive: true });
