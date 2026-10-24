@@ -17,6 +17,10 @@ import {
   recordLesson,
   generateRelease,
   generateBddScaffold,
+  startPhasedDevelopment,
+  checkCurrentPhase,
+  runFinalHealthcheck,
+  getPhasePlan,
 } from './index.js';
 
 /**
@@ -148,6 +152,55 @@ export const TOOLS = [
       required: ['id'],
     },
   },
+  {
+    name: 'start_phased_plan',
+    description: 'Activa el modo de desarrollo por fases: crea un plan con features ordenadas (feat + check → siguiente feat) y su bitácora en docs/bitacora/<PLAN-ID>.md.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'ID del plan (ej: PLAN-001)' },
+        title: { type: 'string', description: 'Título del plan' },
+        phases: {
+          type: 'array',
+          description: 'Features en orden de ejecución',
+          items: {
+            type: 'object',
+            properties: { id: { type: 'string' }, title: { type: 'string' } },
+            required: ['id', 'title'],
+          },
+        },
+        healthCommands: { type: 'object', description: 'Comandos del healthcheck final { gate: comando } (default: pnpm test y pnpm test:bdd)' },
+      },
+      required: ['id', 'title', 'phases'],
+    },
+  },
+  {
+    name: 'check_current_phase',
+    description: 'Ejecuta el check de la feat actual del plan activo. Si pasa, avanza a la siguiente feat; si falla, abre una tarea fix y devuelve el diagnóstico para que el agente la corrija y vuelva a invocar esta herramienta.',
+    inputSchema: {
+      type: 'object',
+      properties: { planId: { type: 'string', description: 'ID del plan (default: plan activo)' } },
+      required: [],
+    },
+  },
+  {
+    name: 'run_final_healthcheck',
+    description: 'Ejecuta el healthcheck final del plan cuando todas las fases están en verde. Si pasa, completa el plan; si falla, abre una tarea hotfix con su diagnóstico.',
+    inputSchema: {
+      type: 'object',
+      properties: { planId: { type: 'string', description: 'ID del plan (default: plan activo)' } },
+      required: [],
+    },
+  },
+  {
+    name: 'get_phased_plan',
+    description: 'Devuelve el estado del plan por fases (fases, fixes/hotfixes, healthcheck y registro de eventos).',
+    inputSchema: {
+      type: 'object',
+      properties: { planId: { type: 'string', description: 'ID del plan (default: plan activo)' } },
+      required: [],
+    },
+  },
 ];
 
 /**
@@ -202,6 +255,15 @@ export const TOOL_HANDLERS = {
   generate_release: async ({ version }, cwd) => generateRelease(version, cwd),
 
   generate_bdd_scaffold: async ({ id }, cwd) => generateBddScaffold(id, cwd),
+
+  start_phased_plan: async ({ id, title, phases, healthCommands }, cwd) =>
+    startPhasedDevelopment({ id, title, phases, ...(healthCommands ? { healthCommands } : {}), projectRoot: cwd }),
+
+  check_current_phase: async ({ planId }, cwd) => checkCurrentPhase({ planId: planId || null, projectRoot: cwd }),
+
+  run_final_healthcheck: async ({ planId }, cwd) => runFinalHealthcheck({ planId: planId || null, projectRoot: cwd }),
+
+  get_phased_plan: async ({ planId }, cwd) => getPhasePlan(planId || null, cwd),
 };
 
 /**
@@ -212,7 +274,7 @@ export const TOOL_HANDLERS = {
  */
 export async function startMcpServer() {
   const server = new Server(
-    { name: 'agente-dev-mcp', version: '1.0.0' },
+    { name: 'agente-dev-mcp', version: '1.1.0' },
     { capabilities: { tools: {} } }
   );
 

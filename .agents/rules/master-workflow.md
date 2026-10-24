@@ -88,4 +88,5 @@ feat 1 → check ✔ → feat 2 → check ✖ → fix → check ✔ → ... → 
 3. **Healthcheck final:** al completar todas las fases, ejecutar **`agt phase:health`** (suite completa):
    - ✔ **Verde:** el plan queda `COMPLETED` y el modo por fases se desactiva.
    - ✖ **Bug:** se crea la tarea `<PLAN-ID>-HOTFIX-<n>` (tipo `hotfix`). Corregir y re-ejecutar `agt phase:health`.
-4. **Seguimiento:** `agt phase:status` muestra fases, fixes abiertos y la ruta de la bitácora. La bitácora se regenera en cada paso con la tabla de fases, fixes/hotfixes, resultado del healthcheck y el registro cronológico de eventos; debe commitearse junto con el código.
+4. **Vía MCP:** las mismas acciones están disponibles como tools `start_phased_plan`, `check_current_phase`, `run_final_healthcheck` y `get_phased_plan`; tras cada fallo, leer el diagnóstico devuelto, corregir el código y volver a invocar la tool.
+5. **Seguimiento:** `agt phase:status` muestra fases, fixes abiertos y la ruta de la bitácora. La bitácora se regenera en cada paso con la tabla de fases, fixes/hotfixes, resultado del healthcheck y el registro cronológico de eventos; debe commitearse junto con el código.

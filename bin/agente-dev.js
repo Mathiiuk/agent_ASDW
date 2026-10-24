@@ -43,7 +43,7 @@ const program = new Command();
 program
   .name('agt')
   .description('CLI del Agente de Workflow Autónomo - Orquestador de Tareas y Ramas Git')
-  .version('1.0.0');
+  .version('1.1.0');
 
 /**
  * COMANDO: init
@@ -475,12 +475,12 @@ program
 
       const { plan, logPath } = startPhasedDevelopment({ id: planId, title: options.title, phases, healthCommands });
 
-      console.log(pc.green(`\n✔ Modo por fases activado: ${pc.bold(plan.id)} (${plan.phases.length} fase(s))`));
+      console.log(pc.green(`\nModo por fases activado: ${pc.bold(plan.id)} (${plan.phases.length} fase(s))`));
       plan.phases.forEach((p, i) => console.log(pc.dim(`  ${i + 1}. ${p.task_id} - ${p.title}`)));
-      console.log(pc.yellow(`\n🔨 Fase actual: ${pc.bold(plan.phases[0].task_id)}. Al terminarla ejecuta: agt phase:check`));
-      console.log(pc.dim(`📓 Bitácora: ${logPath}\n`));
+      console.log(pc.yellow(`\nFase actual: ${pc.bold(plan.phases[0].task_id)}. Al terminarla ejecuta: agt phase:check`));
+      console.log(pc.dim(`Bitácora: ${logPath}\n`));
     } catch (error) {
-      console.error(pc.red(`\n✖ Error al iniciar el modo por fases: ${error.message}\n`));
+      console.error(pc.red(`\nError al iniciar el modo por fases: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -497,23 +497,23 @@ program
       const res = checkCurrentPhase({ planId });
 
       if (res.passed) {
-        console.log(pc.green(`\n✔ Check en verde para ${pc.bold(res.phase.task_id)}.`));
+        console.log(pc.green(`\nCheck en verde para ${pc.bold(res.phase.task_id)}.`));
         if (res.nextPhase) {
-          console.log(pc.yellow(`🔨 Siguiente feat: ${pc.bold(res.nextPhase.task_id)} - ${res.nextPhase.title}`));
+          console.log(pc.yellow(`Siguiente feat: ${pc.bold(res.nextPhase.task_id)} - ${res.nextPhase.title}`));
         } else {
-          console.log(pc.cyan(`🏁 Todas las fases completadas. Ejecuta el healthcheck final: agt phase:health`));
+          console.log(pc.cyan(`Todas las fases completadas. Ejecuta el healthcheck final: agt phase:health`));
         }
       } else {
-        console.log(pc.red(`\n✖ Check fallido para ${pc.bold(res.phase.task_id)}. Fix abierto: ${pc.bold(res.fixTask)}`));
+        console.log(pc.red(`\nCheck fallido para ${pc.bold(res.phase.task_id)}. Fix abierto: ${pc.bold(res.fixTask)}`));
         res.diagnostics.forEach((d) => console.log(pc.red(`  - [${d.category}] ${d.gate}: ${pc.white(d.suggestion)}`)));
         console.log(pc.yellow(`\nCorrige el bug y vuelve a ejecutar: agt phase:check`));
       }
-      console.log(pc.dim(`📓 Bitácora: ${res.logPath}\n`));
+      console.log(pc.dim(`Bitácora: ${res.logPath}\n`));
       if (!res.passed) {
         process.exit(1);
       }
     } catch (error) {
-      console.error(pc.red(`\n✖ Error en el check de fase: ${error.message}\n`));
+      console.error(pc.red(`\nError en el check de fase: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -530,22 +530,22 @@ program
       const res = runFinalHealthcheck({ planId });
 
       res.results.forEach((r) => {
-        const line = `  ${r.passed ? '✔ [PASS]' : '✖ [FAIL]'} ${r.gate} -> ${pc.dim(r.command)}`;
+        const line = `  ${r.passed ? "[PASS]" : "[FAIL]"} ${r.gate} -> ${pc.dim(r.command)}`;
         console.log(r.passed ? pc.green(line) : pc.red(line));
       });
 
       if (res.passed) {
-        console.log(pc.green(`\n🎉 Healthcheck final en verde. Plan completado y modo por fases desactivado.`));
+        console.log(pc.green(`\nHealthcheck final en verde. Plan completado y modo por fases desactivado.`));
       } else {
-        console.log(pc.red(`\n🚑 Healthcheck fallido. Hotfix abierto: ${pc.bold(res.hotfixTask)}`));
+        console.log(pc.red(`\nHealthcheck fallido. Hotfix abierto: ${pc.bold(res.hotfixTask)}`));
         console.log(pc.yellow(`Corrige el bug y vuelve a ejecutar: agt phase:health`));
       }
-      console.log(pc.dim(`📓 Bitácora: ${res.logPath}\n`));
+      console.log(pc.dim(`Bitácora: ${res.logPath}\n`));
       if (!res.passed) {
         process.exit(1);
       }
     } catch (error) {
-      console.error(pc.red(`\n✖ Error en el healthcheck: ${error.message}\n`));
+      console.error(pc.red(`\nError en el healthcheck: ${error.message}\n`));
       process.exit(1);
     }
   });
@@ -560,7 +560,7 @@ program
   .action((planId) => {
     try {
       const plan = getPhasePlan(planId);
-      console.log(pc.cyan(`\n📋 Plan ${pc.bold(plan.id)}: ${plan.title} [${pc.yellow(plan.status)}]\n`));
+      console.log(pc.cyan(`\nPlan ${pc.bold(plan.id)}: ${plan.title} [${pc.yellow(plan.status)}]\n`));
       plan.phases.forEach((p, i) => {
         const color = p.status === 'DONE' ? pc.green : p.status === 'FIXING' ? pc.red : p.status === 'IN_PROGRESS' ? pc.yellow : pc.dim;
         console.log(`  ${i + 1}. ${pc.bold(p.task_id.padEnd(14))} [${color(p.status.padEnd(11))}] ${p.title}`);
@@ -569,9 +569,9 @@ program
       if (open.length > 0) {
         console.log(pc.red(`\n  Correcciones abiertas: ${open.map((f) => `${f.id} (${f.type})`).join(', ')}`));
       }
-      console.log(pc.dim(`\n📓 Bitácora: docs/bitacora/${plan.id}.md\n`));
+      console.log(pc.dim(`\nBitácora: docs/bitacora/${plan.id}.md\n`));
     } catch (error) {
-      console.error(pc.red(`\n✖ ${error.message}\n`));
+      console.error(pc.red(`\n${error.message}\n`));
       process.exit(1);
     }
   });

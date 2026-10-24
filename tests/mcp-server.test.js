@@ -81,4 +81,21 @@ describe('Servidor MCP - Catálogo y Handlers de Herramientas (src/mcp-server.js
     expect(loopResult.diagnostics.length).toBeGreaterThan(0);
     expect(loopResult.reportPath).toBeTypeOf('string');
   });
+
+  it('las tools del modo por fases deben iniciar el plan, abrir un fix al fallar y exponer el estado', async () => {
+    const started = await TOOL_HANDLERS.start_phased_plan(
+      { id: 'PLAN-MCP', title: 'Plan vía MCP', phases: [{ id: 'MCP-0101', title: 'Login' }] },
+      tempDir
+    );
+    expect(started.plan.status).toBe('ACTIVE');
+
+    // Fuera del repo real 'pnpm test' falla, así que el check debe abrir un fix
+    const check = await TOOL_HANDLERS.check_current_phase({}, tempDir);
+    expect(check.passed).toBe(false);
+    expect(check.fixTask).toBe('MCP-0101-FIX-1');
+
+    const plan = await TOOL_HANDLERS.get_phased_plan({}, tempDir);
+    expect(plan.phases[0].status).toBe('FIXING');
+    expect(fs.existsSync(path.join(tempDir, 'docs', 'bitacora', 'PLAN-MCP.md'))).toBe(true);
+  });
 });

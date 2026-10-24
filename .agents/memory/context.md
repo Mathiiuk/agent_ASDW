@@ -1,22 +1,23 @@
-# 🧠 Contexto y Memoria del Proyecto: agent_ASDW
+# 🧠 Contexto y Memoria del Proyecto: agente_dev
 
-> **Última sincronización:** 2026-09-14T12:11:17.382Z | **Nodos:** 31 | **Tareas:** 9
+> **Última sincronización:** 2026-10-24T19:50:09.822Z | **Nodos:** 35 | **Tareas:** 10
 
 ## 📦 Mapa de Módulos y Dependencias
 
 | Módulo | Líneas | Dependencias Principales |
 |---|---|---|
-| `bin/agente-dev.js` | 462 | commander, picocolors, ../src/index.js |
-| `src/memory.js` | 336 | node:fs, node:path, ./task-manager.js |
-| `src/task-manager.js` | 300 | node:fs, node:path, js-yaml |
-| `src/init.js` | 262 | node:fs, node:path, node:url |
-| `src/mcp-server.js` | 248 | @modelcontextprotocol/sdk/server/index.js, @modelcontextprotocol/sdk/server/stdio.js, @modelcontextprotocol/sdk/types.js |
-| `src/validator.js` | 187 | node:fs, node:path, node:child_process |
-| `src/git.js` | 176 | node:child_process |
-| `src/workflow-runner.js` | 169 | node:fs, node:path, ./task-manager.js |
+| `bin/agente-dev.js` | 598 | commander, picocolors, ../src/index.js |
+| `src/phase-runner.js` | 475 | node:fs, node:path, js-yaml |
+| `src/memory.js` | 328 | node:fs, node:path, ./task-manager.js |
+| `src/mcp-server.js` | 310 | @modelcontextprotocol/sdk/server/index.js, @modelcontextprotocol/sdk/server/stdio.js, @modelcontextprotocol/sdk/types.js |
+| `src/task-manager.js` | 294 | node:fs, node:path, js-yaml |
+| `src/init.js` | 265 | node:fs, node:path, node:url |
+| `src/validator.js` | 178 | node:fs, node:path, node:child_process |
+| `src/git.js` | 160 | node:child_process |
+| `src/workflow-runner.js` | 160 | node:fs, node:path, ./task-manager.js |
 | `src/release-manager.js` | 105 | node:fs, node:path, js-yaml |
-| `src/scaffolder.js` | 85 | node:fs, node:path, @cucumber/cucumber |
-| `src/index.js` | 27 | ninguna |
+| `src/scaffolder.js` | 83 | node:fs, node:path, @cucumber/cucumber |
+| `src/index.js` | 21 | ninguna |
 
 ## 📋 Tareas Registradas
 
@@ -29,6 +30,7 @@
 - **AGT-0007: Implementacion de Memoria Graphify para Ahorro de Tokens y Aprendizaje de Errores** `[READY_FOR_PR]`
 - **AGT-0008: Fix compatibilidad CI CD pnpm v11 con Node 22 y 24** `[READY_FOR_PR]`
 - **AGT-0010: Integracion de MCP, Release Manager y BDD Scaffolder** `[PLANNED]`
+- **AGT-0011: Modo de desarrollo por fases con healthcheck y bitacora** `[READY_FOR_PR]`
 
 ## 💡 Lecciones Aprendidas y Anti-Patrones a Evitar
 

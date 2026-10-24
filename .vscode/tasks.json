@@ -18,6 +18,24 @@
       "type": "shell",
       "command": "agt memory:sync",
       "problemMatcher": []
+    },
+    {
+      "label": "🤖 Agente: Check de Fase",
+      "type": "shell",
+      "command": "agt phase:check",
+      "problemMatcher": []
+    },
+    {
+      "label": "🤖 Agente: Healthcheck Final",
+      "type": "shell",
+      "command": "agt phase:health",
+      "problemMatcher": []
+    },
+    {
+      "label": "🤖 Agente: Estado del Plan por Fases",
+      "type": "shell",
+      "command": "agt phase:status",
+      "problemMatcher": []
     }
   ]
 }

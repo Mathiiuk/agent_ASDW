@@ -75,7 +75,7 @@ export function initProject({ targetDir = process.cwd(), copyCucumber = true, co
   }
 
   // 3. Creamos la estructura limpia de directorios para el workflow de tareas
-  const workflowSubdirs = ['tasks', 'specs', 'plans', 'tests', 'features', 'executions', 'guides'];
+  const workflowSubdirs = ['tasks', 'specs', 'plans', 'tests', 'features', 'executions', 'guides', 'phases'];
   const createdWorkflowDirs = [];
 
   for (const sub of workflowSubdirs) {
@@ -124,6 +124,8 @@ Estás operando en un entorno de desarrollo estructurado para Agentes de IA.
 >    **[.agents/memory/context.md](.agents/memory/context.md)**
 
 Para ejecutar tareas, asume los roles especializados (Frontend, Backend, DevOps, etc.) definidos en la carpeta \`.agents/skills/\`.
+
+Para entregas de varias features usa el **modo de desarrollo por fases** (\`agt phase:start\` / \`phase:check\` / \`phase:health\`, o las tools MCP equivalentes): feat + check → siguiente feat, fix si un check falla, healthcheck final y hotfix si falla. Todo queda documentado en \`docs/bitacora/<PLAN-ID>.md\`.
 `;
 
   // Archivos clave leídos por los IDEs y extensiones más populares
@@ -153,7 +155,10 @@ Para ejecutar tareas, asume los roles especializados (Frontend, Backend, DevOps,
       const agentScripts = {
         "agt:task": "agt task:new",
         "agt:loop": "agt task:loop",
-        "agt:memory": "agt memory:sync"
+        "agt:memory": "agt memory:sync",
+        "agt:phase:check": "agt phase:check",
+        "agt:phase:health": "agt phase:health",
+        "agt:phase:status": "agt phase:status"
       };
 
       for (const [key, val] of Object.entries(agentScripts)) {
@@ -186,7 +191,10 @@ Para ejecutar tareas, asume los roles especializados (Frontend, Backend, DevOps,
       "tasks": [
         { "label": "🤖 Agente: Nueva Tarea", "type": "shell", "command": "agt task:new", "problemMatcher": [] },
         { "label": "🤖 Agente: Bucle Autónomo", "type": "shell", "command": "agt task:loop", "problemMatcher": [] },
-        { "label": "🤖 Agente: Sincronizar Memoria", "type": "shell", "command": "agt memory:sync", "problemMatcher": [] }
+        { "label": "🤖 Agente: Sincronizar Memoria", "type": "shell", "command": "agt memory:sync", "problemMatcher": [] },
+        { "label": "🤖 Agente: Check de Fase", "type": "shell", "command": "agt phase:check", "problemMatcher": [] },
+        { "label": "🤖 Agente: Healthcheck Final", "type": "shell", "command": "agt phase:health", "problemMatcher": [] },
+        { "label": "🤖 Agente: Estado del Plan por Fases", "type": "shell", "command": "agt phase:status", "problemMatcher": [] }
       ]
     };
     fs.writeFileSync(tasksJsonPath, JSON.stringify(tasksConfig, null, 2) + '\n', 'utf-8');
