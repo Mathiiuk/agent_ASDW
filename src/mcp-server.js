@@ -21,7 +21,10 @@ import {
   checkCurrentPhase,
   runFinalHealthcheck,
   getPhasePlan,
+  getNextStep,
+  resumePhasedPlan,
 } from './index.js';
+import { resolveProjectRoot, PROJECT_ROOT_ENV } from './project-root.js';
 
 /**
  * Catálogo de herramientas del Agente expuestas vía MCP.
@@ -170,6 +173,7 @@ export const TOOLS = [
           },
         },
         healthCommands: { type: 'object', description: 'Comandos del healthcheck final { gate: comando } (default: pnpm test y pnpm test:bdd)' },
+        maxAttempts: { type: 'number', description: 'Checks fallidos consecutivos antes de bloquear el plan (default 3)' },
       },
       required: ['id', 'title', 'phases'],
     },
@@ -201,7 +205,53 @@ export const TOOLS = [
       required: [],
     },
   },
+  {
+    name: 'resume_phased_plan',
+    description: 'Reanuda un plan bloqueado por límite de intentos. Usar solo cuando un humano lo indique tras revisar el bloqueo.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        planId: { type: 'string', description: 'ID del plan (default: plan activo)' },
+        note: { type: 'string', description: 'Qué se cambió para desbloquear (queda en la bitácora)' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'next_step',
+    description:
+      'Devuelve la siguiente acción concreta del flujo por fases (IMPLEMENT_FEATURE, FIX_BUG, RUN_HEALTHCHECK, FIX_HOTFIX, BLOCKED, DONE) con la tarea, artefactos a leer, diagnóstico y la tool a invocar después. Trabaja en bucle: llamar a next_step, ejecutar la acción y repetir hasta recibir done = true.',
+    inputSchema: {
+      type: 'object',
+      properties: { planId: { type: 'string', description: 'ID del plan (default: plan activo)' } },
+      required: [],
+    },
+  },
 ];
+
+// Toda tool acepta un projectRoot opcional para operar sobre otro proyecto que el cwd del servidor
+for (const tool of TOOLS) {
+  tool.inputSchema.properties.projectRoot = {
+    type: 'string',
+    description: `Ruta absoluta del proyecto (default: variable ${PROJECT_ROOT_ENV} o el directorio del servidor)`,
+  };
+}
+
+/**
+ * Ejecuta una tool por nombre resolviendo antes la raíz del proyecto.
+ *
+ * @param {string} name - Nombre de la tool
+ * @param {object} [args] - Argumentos crudos de la llamada MCP
+ * @returns {Promise<object>} - Resultado serializable del handler
+ */
+export async function callTool(name, args = {}) {
+  const handler = TOOL_HANDLERS[name];
+  if (!handler) {
+    throw new Error(`Tool no reconocida: ${name}`);
+  }
+  const { projectRoot, ...rest } = args;
+  return handler(rest, resolveProjectRoot(projectRoot));
+}
 
 /**
  * Implementación de cada herramienta. Cada handler recibe los argumentos crudos
@@ -256,14 +306,26 @@ export const TOOL_HANDLERS = {
 
   generate_bdd_scaffold: async ({ id }, cwd) => generateBddScaffold(id, cwd),
 
-  start_phased_plan: async ({ id, title, phases, healthCommands }, cwd) =>
-    startPhasedDevelopment({ id, title, phases, ...(healthCommands ? { healthCommands } : {}), projectRoot: cwd }),
+  start_phased_plan: async ({ id, title, phases, healthCommands, maxAttempts }, cwd) =>
+    startPhasedDevelopment({
+      id,
+      title,
+      phases,
+      ...(healthCommands ? { healthCommands } : {}),
+      ...(maxAttempts ? { maxAttempts } : {}),
+      projectRoot: cwd,
+    }),
 
   check_current_phase: async ({ planId }, cwd) => checkCurrentPhase({ planId: planId || null, projectRoot: cwd }),
 
   run_final_healthcheck: async ({ planId }, cwd) => runFinalHealthcheck({ planId: planId || null, projectRoot: cwd }),
 
   get_phased_plan: async ({ planId }, cwd) => getPhasePlan(planId || null, cwd),
+
+  resume_phased_plan: async ({ planId, note }, cwd) =>
+    resumePhasedPlan({ planId: planId || null, note: note || '', projectRoot: cwd }),
+
+  next_step: async ({ planId }, cwd) => getNextStep({ planId: planId || null, projectRoot: cwd }),
 };
 
 /**
@@ -274,25 +336,15 @@ export const TOOL_HANDLERS = {
  */
 export async function startMcpServer() {
   const server = new Server(
-    { name: 'agente-dev-mcp', version: '1.1.0' },
+    { name: 'agente-dev-mcp', version: '1.2.0' },
     { capabilities: { tools: {} } }
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const cwd = process.cwd();
-    const handler = TOOL_HANDLERS[request.params.name];
-
-    if (!handler) {
-      return {
-        content: [{ type: 'text', text: `Tool no reconocida: ${request.params.name}` }],
-        isError: true,
-      };
-    }
-
     try {
-      const result = await handler(request.params.arguments || {}, cwd);
+      const result = await callTool(request.params.name, request.params.arguments || {});
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

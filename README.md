@@ -148,7 +148,7 @@ agt phase:start PLAN-001 -t "Portal de clientes" -p "AGT-0002:Login" -p "AGT-000
 agt phase:check     # al terminar cada feat: avanza o abre un fix
 agt phase:health    # al final: completa el plan o abre un hotfix
 ```
-Revisa y commitea la bitácora `docs/bitacora/PLAN-001.md` junto con el código.
+Revisa y commitea la bitácora `docs/bitacora/PLAN-001.md` junto con el código. Para que la IA lo recorra sola de punta a punta, ver [Automatización Autónoma](#14-automatización-autónoma-de-punta-a-punta-agt-next--hook-stop).
 
 **6. Mantener la memoria al día**
 ```bash
@@ -325,7 +325,11 @@ Agrega la siguiente configuración en tu panel de herramientas MCP o en tu archi
   }
 }
 ```
-*Nota:* `"command": "agt"` requiere haber enlazado la CLI (`npm link`). Si no, usa `"command": "node"` con `"args": ["/ruta/a/agent_ASDW/bin/agente-dev.js", "mcp"]`. El servidor opera sobre el directorio de trabajo del cliente, así que ábrelo desde la raíz de tu proyecto.
+*Nota:* `"command": "agt"` requiere haber enlazado la CLI (`npm link`). Si no, usa `"command": "node"` con `"args": ["/ruta/a/agent_ASDW/bin/agente-dev.js", "mcp"]`. El servidor opera sobre el directorio desde donde el cliente lo lanza. Si tu cliente lo lanza desde otro lugar (por ejemplo Claude Desktop), fija la raíz del proyecto con la variable `AGT_PROJECT_ROOT`:
+```json
+{ "mcpServers": { "agente-dev": { "command": "agt", "args": ["mcp"], "env": { "AGT_PROJECT_ROOT": "/ruta/a/mi-proyecto" } } } }
+```
+Además, toda tool acepta un argumento opcional `projectRoot` (prioridad: `projectRoot` > `AGT_PROJECT_ROOT` > directorio actual). En la CLI, el equivalente es `agt --root /ruta/a/mi-proyecto <comando>`.
 
 **Herramientas expuestas (acción, no solo lectura):**
 
@@ -347,6 +351,8 @@ Agrega la siguiente configuración en tu panel de herramientas MCP o en tu archi
 | `check_current_phase` | `phase:check` | Check de la feat actual: avanza o abre un fix con diagnóstico |
 | `run_final_healthcheck` | `phase:health` | Healthcheck final: completa el plan o abre un hotfix |
 | `get_phased_plan` | `phase:status` | Estado del plan, fixes/hotfixes y registro de eventos |
+| `resume_phased_plan` | `phase:resume` | Reanudar un plan bloqueado por límite de intentos |
+| `next_step` | `next` | **Siguiente acción concreta** del flujo (ver sección 14) |
 
 *Impacto:* el agente de IA conectado obtiene control real sobre el flujo — crea la tarea, escribe el código, llama a `verify_task_quality_gates`/`run_self_healing_loop`, lee el diagnóstico estructurado (categoría + sugerencia por gate fallido), corrige el código con sus propias herramientas de edición, y vuelve a invocar la herramienta hasta que todo pase. Ese ciclo de "ejecutar → diagnosticar → corregir → reverificar" impulsado por el propio agente de IA es lo que lo convierte en un flujo de trabajo autónomo real, en vez de un simple generador de plantillas.
 
@@ -396,6 +402,41 @@ flowchart LR
 - No se avanza a la siguiente feat mientras la fase tenga un fix abierto; un nuevo fallo reutiliza el mismo fix.
 - El healthcheck solo se puede ejecutar cuando todas las fases están en verde.
 - La bitácora `docs/bitacora/<PLAN-ID>.md` se regenera en cada paso con: tabla de fases, fixes/hotfixes con diagnóstico, resultado del healthcheck y registro cronológico. El estado interno vive en `.agents/workflow/phases/`.
+- **Límite de intentos:** tras `--max-attempts` checks fallidos consecutivos (por defecto 3) en una fase o en el healthcheck, el plan pasa a `BLOCKED` y espera intervención humana. Se reanuda con `agt phase:resume -n "qué se cambió"`.
+
+---
+
+### 14. Automatización Autónoma de Punta a Punta (`agt next` + hook Stop)
+Objetivo: darle a la IA una meta y que trabaje sola hasta `COMPLETED`, o hasta un bloqueo documentado.
+
+**1. `next_step` / `agt next`: qué hacer ahora.** Lee el estado del plan y devuelve una única acción con todo su contexto:
+
+```bash
+agt next          # legible
+agt next --json   # para la IA, hooks y scripts
+```
+```json
+{ "action": "FIX_BUG", "task": "AGT-0012-FIX-1", "diagnosis": "[ASSERTION_FAILURE] unit_tests",
+  "artifacts": { "report": ".agents/workflow/executions/AGT-0012.md", "...": "..." },
+  "tool": "check_current_phase", "cli": "agt phase:check", "done": false }
+```
+Acciones posibles: `IMPLEMENT_FEATURE`, `FIX_BUG`, `RUN_HEALTHCHECK`, `FIX_HOTFIX`, `BLOCKED`, `DONE` y `NO_ACTIVE_PLAN`. La IA solo repite el bucle: llama a `next_step`, ejecuta la acción e invoca la tool indicada, hasta recibir `done: true`.
+
+**2. Hook Stop (Claude Code): no termina antes de tiempo.** `agt init` (o `agt hook:install`) registra en `.claude/settings.json`:
+```json
+{ "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "agt hook:stop" } ] } ] } }
+```
+Cuando la IA intenta terminar su turno con el plan sin completar, el hook responde `{"decision": "block", "reason": "..."}` con la siguiente acción, y la IA continúa sola.
+
+Salvaguardas contra bucles y gasto de tokens:
+- Se permite detenerse con el plan `COMPLETED` o `BLOCKED`, o sin plan activo.
+- Si la IA recibe `--max-idle` avisos seguidos (por defecto 2) sin ejecutar ningún check, el hook deja de bloquear.
+- Ante cualquier error interno, el hook nunca impide detenerse.
+
+**3. Ejecución desatendida (ejemplo con Claude Code):**
+```bash
+claude -p "Usando el modo por fases de agt, implementa: portal de clientes con login y dashboard. Trabaja con agt next hasta terminar." --permission-mode acceptEdits
+```
 
 ---
 
@@ -541,6 +582,8 @@ Para llevar las reglas, skills y plantillas nuevas a un proyecto que ya usa el a
 | Un commit queda bloqueado por el hook | Estás en la rama de una tarea y sus gates fallan: corre `agt task:loop <ID>` y corrige. |
 | `phase:check` dice que el modo no está activo | Inícialo con `agt phase:start`, o pasa el ID: `agt phase:check PLAN-001`. |
 | `phase:health` dice que hay fases sin check | Ejecuta `agt phase:check` hasta que todas las fases estén en verde. |
+| El plan quedó `BLOCKED` | Se alcanzó el límite de intentos. Revisa el reporte de la fase y el diagnóstico en la bitácora, corrige y ejecuta `agt phase:resume -n "..."`. |
+| Claude Code no se detiene | El hook Stop detectó trabajo pendiente: mira `agt next`. Para desactivarlo, quita `agt hook:stop` de `.claude/settings.json`. |
 | El cliente MCP no ve herramientas | Verifica que `agt mcp` arranque sin errores en una terminal y que el cliente se abra en la raíz del proyecto. |
 
 ---

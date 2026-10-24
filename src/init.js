@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { installStopHook } from './stop-hook.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -125,7 +126,7 @@ Estás operando en un entorno de desarrollo estructurado para Agentes de IA.
 
 Para ejecutar tareas, asume los roles especializados (Frontend, Backend, DevOps, etc.) definidos en la carpeta \`.agents/skills/\`.
 
-Para entregas de varias features usa el **modo de desarrollo por fases** (\`agt phase:start\` / \`phase:check\` / \`phase:health\`, o las tools MCP equivalentes): feat + check → siguiente feat, fix si un check falla, healthcheck final y hotfix si falla. Todo queda documentado en \`docs/bitacora/<PLAN-ID>.md\`.
+Para entregas de varias features usa el **modo de desarrollo por fases** (\`agt phase:start\` / \`phase:check\` / \`phase:health\`, o las tools MCP equivalentes): feat + check → siguiente feat, fix si un check falla, healthcheck final y hotfix si falla. Todo queda documentado en \`docs/bitacora/<PLAN-ID>.md\`. Consulta siempre la siguiente acción con la tool \`next_step\` (o \`agt next\`) y repite hasta recibir \`done: true\`.
 `;
 
   // Archivos clave leídos por los IDEs y extensiones más populares
@@ -252,6 +253,14 @@ exit 0
     }
   }
 
+  // 10. Hook Stop de Claude Code: el agente no termina mientras el plan por fases tenga trabajo pendiente
+  let stopHookInstalled = false;
+  try {
+    stopHookInstalled = installStopHook(targetDir).installed;
+  } catch {
+    // Si .claude/settings.json existe pero está malformado, no lo tocamos
+  }
+
   return {
     targetDir,
     copiedFolders,
@@ -259,6 +268,7 @@ exit 0
     ciCreated,
     packageScriptsAdded,
     vscodeTasksCreated,
-    gitHookCreated
+    gitHookCreated,
+    stopHookInstalled
   };
 }

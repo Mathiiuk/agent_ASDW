@@ -1,23 +1,26 @@
 # 🧠 Contexto y Memoria del Proyecto: agente_dev
 
-> **Última sincronización:** 2026-10-24T19:50:09.822Z | **Nodos:** 35 | **Tareas:** 10
+> **Última sincronización:** 2026-10-24T22:32:37.905Z | **Nodos:** 44 | **Tareas:** 13
 
 ## 📦 Mapa de Módulos y Dependencias
 
 | Módulo | Líneas | Dependencias Principales |
 |---|---|---|
-| `bin/agente-dev.js` | 598 | commander, picocolors, ../src/index.js |
-| `src/phase-runner.js` | 475 | node:fs, node:path, js-yaml |
+| `bin/agente-dev.js` | 729 | commander, picocolors, ../src/index.js |
+| `src/phase-runner.js` | 548 | node:fs, node:path, js-yaml |
+| `src/mcp-server.js` | 362 | @modelcontextprotocol/sdk/server/index.js, @modelcontextprotocol/sdk/server/stdio.js, @modelcontextprotocol/sdk/types.js |
 | `src/memory.js` | 328 | node:fs, node:path, ./task-manager.js |
-| `src/mcp-server.js` | 310 | @modelcontextprotocol/sdk/server/index.js, @modelcontextprotocol/sdk/server/stdio.js, @modelcontextprotocol/sdk/types.js |
 | `src/task-manager.js` | 294 | node:fs, node:path, js-yaml |
-| `src/init.js` | 265 | node:fs, node:path, node:url |
+| `src/init.js` | 275 | node:fs, node:path, node:url |
 | `src/validator.js` | 178 | node:fs, node:path, node:child_process |
 | `src/git.js` | 160 | node:child_process |
 | `src/workflow-runner.js` | 160 | node:fs, node:path, ./task-manager.js |
+| `src/next-step.js` | 126 | node:path, ./phase-runner.js |
+| `src/stop-hook.js` | 112 | node:fs, node:path, ./next-step.js |
 | `src/release-manager.js` | 105 | node:fs, node:path, js-yaml |
 | `src/scaffolder.js` | 83 | node:fs, node:path, @cucumber/cucumber |
-| `src/index.js` | 21 | ninguna |
+| `src/index.js` | 30 | ninguna |
+| `src/project-root.js` | 27 | node:fs, node:path |
 
 ## 📋 Tareas Registradas
 
@@ -31,6 +34,9 @@
 - **AGT-0008: Fix compatibilidad CI CD pnpm v11 con Node 22 y 24** `[READY_FOR_PR]`
 - **AGT-0010: Integracion de MCP, Release Manager y BDD Scaffolder** `[PLANNED]`
 - **AGT-0011: Modo de desarrollo por fases con healthcheck y bitacora** `[READY_FOR_PR]`
+- **AGT-0012: projectRoot configurable en MCP y CLI** `[READY_FOR_PR]`
+- **AGT-0013: Tool next_step y salida JSON** `[READY_FOR_PR]`
+- **AGT-0014: Hook Stop con limite de intentos** `[READY_FOR_PR]`
 
 ## 💡 Lecciones Aprendidas y Anti-Patrones a Evitar
 

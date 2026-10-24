@@ -90,3 +90,18 @@ feat 1 → check ✔ → feat 2 → check ✖ → fix → check ✔ → ... → 
    - ✖ **Bug:** se crea la tarea `<PLAN-ID>-HOTFIX-<n>` (tipo `hotfix`). Corregir y re-ejecutar `agt phase:health`.
 4. **Vía MCP:** las mismas acciones están disponibles como tools `start_phased_plan`, `check_current_phase`, `run_final_healthcheck` y `get_phased_plan`; tras cada fallo, leer el diagnóstico devuelto, corregir el código y volver a invocar la tool.
 5. **Seguimiento:** `agt phase:status` muestra fases, fixes abiertos y la ruta de la bitácora. La bitácora se regenera en cada paso con la tabla de fases, fixes/hotfixes, resultado del healthcheck y el registro cronológico de eventos; debe commitearse junto con el código.
+6. **Límite de intentos:** tras `max_attempts` checks fallidos consecutivos (por defecto 3), el plan queda `BLOCKED`. **Detenerse e informar al usuario** con el diagnóstico; no reanudar (`agt phase:resume`) sin su indicación.
+
+### Bucle autónomo (obligatorio con el modo por fases activo)
+
+No adivinar el siguiente paso: consultarlo siempre.
+
+1. Invocar la tool MCP `next_step` (o `agt next --json`).
+2. Ejecutar la acción devuelta:
+   - `IMPLEMENT_FEATURE`: completar spec, plan y `.feature`, escribir tests y código.
+   - `FIX_BUG` / `FIX_HOTFIX`: leer el reporte y el diagnóstico, y corregir la causa raíz.
+   - `RUN_HEALTHCHECK`: ejecutar el healthcheck.
+3. Invocar la tool indicada en `tool` (`check_current_phase` / `run_final_healthcheck`) y commitear la fase cuando quede en verde.
+4. Repetir hasta que `done` sea `true`: `DONE` (presentar el resumen) o `BLOCKED` (pedir intervención).
+
+En Claude Code, el hook Stop (`agt hook:stop`, instalado por `agt init` o `agt hook:install`) impide terminar el turno mientras quede trabajo pendiente.

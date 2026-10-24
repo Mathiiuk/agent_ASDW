@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.2.0] - 2026-10-24
+
+Desarrollado con el propio modo por fases del agente: plan `PLAN-002` (bitácora en `docs/bitacora/PLAN-002.md`).
+
+### 🚀 Funcionalidades (Features)
+- **[AGT-0012]** `projectRoot` configurable: argumento `projectRoot` en todas las tools MCP, variable `AGT_PROJECT_ROOT` y flag global `agt --root <dir>`.
+- **[AGT-0013]** Tool MCP `next_step` y comando `agt next [--json]`: la siguiente acción concreta del flujo, con tarea, artefactos, diagnóstico y tool a invocar. Nuevo `agt phase:status --json`.
+- **[AGT-0014]** Límite de intentos (`--max-attempts`, default 3), estado `BLOCKED` y `agt phase:resume` / tool `resume_phased_plan`. Hook Stop para Claude Code (`agt hook:stop`), con salvaguarda `--max-idle`; se instala con `agt hook:install` o `agt init`.
+
+### 📝 Documentación
+- README: sección 14 "Automatización Autónoma de Punta a Punta", tools nuevas y problemas frecuentes.
+- Regla maestra: bucle autónomo obligatorio con `next_step` y límite de intentos.
+
 ## [v1.1.0] - 2026-10-24
 
 ### 🚀 Funcionalidades (Features)

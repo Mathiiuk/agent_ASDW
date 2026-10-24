@@ -23,7 +23,12 @@ export const PHASE_PATHS = {
 /**
  * Estados posibles de un plan por fases
  */
-export const PLAN_STATUSES = ['ACTIVE', 'HEALTHCHECK', 'HOTFIX_REQUIRED', 'COMPLETED'];
+export const PLAN_STATUSES = ['ACTIVE', 'HEALTHCHECK', 'HOTFIX_REQUIRED', 'BLOCKED', 'COMPLETED'];
+
+/**
+ * Checks fallidos consecutivos (por fase o en el healthcheck) antes de bloquear el plan
+ */
+export const DEFAULT_MAX_ATTEMPTS = 3;
 
 /**
  * Comandos por defecto del healthcheck final (suite completa del proyecto)
@@ -122,6 +127,10 @@ export function renderPhaseLog(plan) {
   let md = `# Bitácora de Desarrollo por Fases - ${plan.id}\n\n`;
   md += `> **${plan.title}**\n\n`;
   md += `- **Estado del plan:** \`${plan.status}\`\n`;
+  if (plan.status === 'BLOCKED') {
+    md += `- **Motivo del bloqueo:** ${plan.blocked_reason}\n`;
+  }
+  md += `- **Límite de intentos:** ${plan.max_attempts ?? DEFAULT_MAX_ATTEMPTS} checks fallidos consecutivos\n`;
   md += `- **Inicio (UTC):** ${plan.created_at}\n`;
   md += `- **Última actualización (UTC):** ${plan.updated_at}\n`;
   md += `- **Flujo:** \`feat → check → siguiente feat\` · bug en check → \`fix\` · healthcheck final · bug en healthcheck → \`hotfix\`\n\n`;
@@ -223,6 +232,7 @@ export function startPhasedDevelopment({
   title,
   phases = [],
   healthCommands = DEFAULT_HEALTH_COMMANDS,
+  maxAttempts = DEFAULT_MAX_ATTEMPTS,
   projectRoot = process.cwd(),
 }) {
   if (!id) {
@@ -262,15 +272,17 @@ export function startPhasedDevelopment({
     created_at: timestamp,
     updated_at: timestamp,
     current_phase: 0,
+    max_attempts: maxAttempts,
     phases: phases.map((p, i) => ({
       task_id: p.id,
       title: p.title,
       status: i === 0 ? 'IN_PROGRESS' : 'PENDING',
       checks: 0,
+      failed_streak: 0,
       fixes: [],
     })),
     fixes: [],
-    healthcheck: { commands: healthCommands, runs: 0, last_result: null },
+    healthcheck: { commands: healthCommands, runs: 0, failed_streak: 0, last_result: null },
     log: [],
   };
 
@@ -298,6 +310,9 @@ export function startPhasedDevelopment({
  */
 export function checkCurrentPhase({ planId = null, gateRunner = runQualityGates, projectRoot = process.cwd() } = {}) {
   const plan = getPhasePlan(planId, projectRoot);
+  if (plan.status === 'BLOCKED') {
+    throw new Error(`El plan '${plan.id}' está bloqueado: ${plan.blocked_reason}. Reanúdalo con: agt phase:resume`);
+  }
   if (plan.status !== 'ACTIVE') {
     throw new Error(`El plan '${plan.id}' está en estado ${plan.status}; no hay fases pendientes de check. Usa: agt phase:health`);
   }
@@ -321,6 +336,7 @@ export function checkCurrentPhase({ planId = null, gateRunner = runQualityGates,
       addLog(plan, 'FIX_RESOLVED', `\`${fix.id}\` resuelto: el check de \`${phase.task_id}\` volvió a verde`);
     }
     phase.status = 'DONE';
+    phase.failed_streak = 0;
     updateTaskStatus(phase.task_id, 'READY_FOR_PR', projectRoot);
     addLog(plan, 'FEAT_CHECK_PASS', `Check de \`${phase.task_id}\` en verde (intento ${phase.checks})`);
 
@@ -359,6 +375,10 @@ export function checkCurrentPhase({ planId = null, gateRunner = runQualityGates,
       plan.fixes.push({ id: fixTask, type: 'fix', origin: phase.task_id, status: 'OPEN', diagnosis });
       addLog(plan, 'FIX_CREATED', `Bug en check de \`${phase.task_id}\` → se crea \`${fixTask}\` — ${diagnosis}`);
     }
+
+    // Límite de intentos: tras N fallos consecutivos el plan se bloquea para intervención humana
+    phase.failed_streak = (phase.failed_streak || 0) + 1;
+    blockIfExhausted(plan, phase.failed_streak, `\`${phase.task_id}\` falló ${phase.failed_streak} checks consecutivos (fix \`${fixTask}\`)`);
   }
 
   // Dejamos evidencia del check en el reporte de ejecución estándar de la tarea
@@ -376,6 +396,7 @@ export function checkCurrentPhase({ planId = null, gateRunner = runQualityGates,
     fixTask,
     diagnostics,
     readyForHealthcheck: plan.status === 'HEALTHCHECK',
+    blocked: plan.status === 'BLOCKED',
     logPath,
   };
 }
@@ -398,6 +419,9 @@ export function runFinalHealthcheck({ planId = null, gateRunner = runQualityGate
   }
   if (plan.status === 'COMPLETED') {
     throw new Error(`El plan '${plan.id}' ya fue completado.`);
+  }
+  if (plan.status === 'BLOCKED') {
+    throw new Error(`El plan '${plan.id}' está bloqueado: ${plan.blocked_reason}. Reanúdalo con: agt phase:resume`);
   }
 
   // Construimos un manifiesto virtual con los comandos del healthcheck
@@ -424,6 +448,7 @@ export function runFinalHealthcheck({ planId = null, gateRunner = runQualityGate
       addLog(plan, 'HOTFIX_RESOLVED', `\`${fix.id}\` resuelto: healthcheck en verde`);
     }
     plan.status = 'COMPLETED';
+    plan.healthcheck.failed_streak = 0;
     addLog(plan, 'HEALTHCHECK_PASS', `Healthcheck final en verde (ejecución ${plan.healthcheck.runs}). Plan completado.`);
     const activePath = path.join(projectRoot, PHASE_PATHS.active);
     if (getActivePhasePlanId(projectRoot) === plan.id) {
@@ -453,10 +478,58 @@ export function runFinalHealthcheck({ planId = null, gateRunner = runQualityGate
       plan.fixes.push({ id: hotfixTask, type: 'hotfix', origin: 'healthcheck', status: 'OPEN', diagnosis });
       addLog(plan, 'HOTFIX_CREATED', `Bug en healthcheck final → se crea \`${hotfixTask}\` — ${diagnosis}`);
     }
+
+    plan.healthcheck.failed_streak = (plan.healthcheck.failed_streak || 0) + 1;
+    blockIfExhausted(plan, plan.healthcheck.failed_streak, `el healthcheck falló ${plan.healthcheck.failed_streak} veces consecutivas (hotfix \`${hotfixTask}\`)`);
   }
 
   const logPath = savePhasePlan(plan, projectRoot);
-  return { passed: execution.allPassed, results: execution.results, hotfixTask, diagnostics, logPath };
+  return { passed: execution.allPassed, results: execution.results, hotfixTask, diagnostics, blocked: plan.status === 'BLOCKED', logPath };
+}
+
+/**
+ * Bloquea el plan si la racha de fallos alcanzó el límite de intentos.
+ *
+ * @param {object} plan - Estado del plan (se modifica in place)
+ * @param {number} streak - Fallos consecutivos acumulados
+ * @param {string} reason - Motivo legible para la bitácora
+ */
+function blockIfExhausted(plan, streak, reason) {
+  const max = plan.max_attempts ?? DEFAULT_MAX_ATTEMPTS;
+  if (streak >= max) {
+    plan.blocked_from = plan.status;
+    plan.status = 'BLOCKED';
+    plan.blocked_reason = reason;
+    addLog(plan, 'PLAN_BLOCKED', `Límite de ${max} intentos alcanzado: ${reason}. Requiere intervención humana.`);
+  }
+}
+
+/**
+ * Reanuda un plan bloqueado por límite de intentos, reiniciando las rachas de fallos.
+ *
+ * @param {object} [options] - Parámetros
+ * @param {string} [options.planId] - ID del plan (por defecto, el plan activo)
+ * @param {string} [options.note=''] - Nota opcional para la bitácora (qué se cambió)
+ * @param {string} [options.projectRoot=process.cwd()] - Directorio raíz del proyecto
+ * @returns {{ plan: object, logPath: string }} - Plan reanudado y ruta de su bitácora
+ */
+export function resumePhasedPlan({ planId = null, note = '', projectRoot = process.cwd() } = {}) {
+  const plan = getPhasePlan(planId, projectRoot);
+  if (plan.status !== 'BLOCKED') {
+    throw new Error(`El plan '${plan.id}' no está bloqueado (estado: ${plan.status}).`);
+  }
+
+  plan.status = plan.blocked_from || 'ACTIVE';
+  delete plan.blocked_from;
+  delete plan.blocked_reason;
+  for (const phase of plan.phases) {
+    phase.failed_streak = 0;
+  }
+  plan.healthcheck.failed_streak = 0;
+  addLog(plan, 'PLAN_RESUMED', `Plan reanudado en estado ${plan.status}${note ? `: ${note}` : ''}`);
+
+  const logPath = savePhasePlan(plan, projectRoot);
+  return { plan, logPath };
 }
 
 /**

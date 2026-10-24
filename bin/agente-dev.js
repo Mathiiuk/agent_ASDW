@@ -25,6 +25,12 @@ import {
   getPhasePlan,
   parsePhaseArg,
   DEFAULT_HEALTH_COMMANDS,
+  resolveProjectRoot,
+  getNextStep,
+  resumePhasedPlan,
+  evaluateStopHook,
+  installStopHook,
+  DEFAULT_MAX_ATTEMPTS,
 } from '../src/index.js';
 
 /**
@@ -43,7 +49,20 @@ const program = new Command();
 program
   .name('agt')
   .description('CLI del Agente de Workflow Autónomo - Orquestador de Tareas y Ramas Git')
-  .version('1.1.0');
+  .version('1.2.0')
+  .option('-C, --root <dir>', 'Raíz del proyecto sobre la que operar (default: AGT_PROJECT_ROOT o el directorio actual)');
+
+// Antes de cada comando fijamos la raíz del proyecto: todos los módulos usan process.cwd() por defecto
+program.hook('preAction', () => {
+  try {
+    process.chdir(resolveProjectRoot(program.opts().root));
+  } catch (error) {
+    console.error(pc.red(`
+Error: ${error.message}
+`));
+    process.exit(1);
+  }
+});
 
 /**
  * COMANDO: init
@@ -457,6 +476,7 @@ program
   .requiredOption('-t, --title <title>', 'Título del plan por fases')
   .option('-p, --phase <TASK-ID:Título>', 'Fase (feat) en orden; repetible', collect, [])
   .option('--health <gate=comando>', 'Comando del healthcheck final; repetible (por defecto: pnpm test y pnpm test:bdd)', collect, [])
+  .option('--max-attempts <n>', 'Checks fallidos consecutivos antes de bloquear el plan', String(DEFAULT_MAX_ATTEMPTS))
   .action((planId, options) => {
     try {
       const phases = options.phase.map(parsePhaseArg);
@@ -473,7 +493,13 @@ program
         }
       }
 
-      const { plan, logPath } = startPhasedDevelopment({ id: planId, title: options.title, phases, healthCommands });
+      const { plan, logPath } = startPhasedDevelopment({
+        id: planId,
+        title: options.title,
+        phases,
+        healthCommands,
+        maxAttempts: parseInt(options.maxAttempts, 10) || DEFAULT_MAX_ATTEMPTS,
+      });
 
       console.log(pc.green(`\nModo por fases activado: ${pc.bold(plan.id)} (${plan.phases.length} fase(s))`));
       plan.phases.forEach((p, i) => console.log(pc.dim(`  ${i + 1}. ${p.task_id} - ${p.title}`)));
@@ -506,7 +532,11 @@ program
       } else {
         console.log(pc.red(`\nCheck fallido para ${pc.bold(res.phase.task_id)}. Fix abierto: ${pc.bold(res.fixTask)}`));
         res.diagnostics.forEach((d) => console.log(pc.red(`  - [${d.category}] ${d.gate}: ${pc.white(d.suggestion)}`)));
-        console.log(pc.yellow(`\nCorrige el bug y vuelve a ejecutar: agt phase:check`));
+        if (res.blocked) {
+          console.log(pc.red(`\nPlan bloqueado por límite de intentos. Revisa el bug y reanuda con: agt phase:resume`));
+        } else {
+          console.log(pc.yellow(`\nCorrige el bug y vuelve a ejecutar: agt phase:check`));
+        }
       }
       console.log(pc.dim(`Bitácora: ${res.logPath}\n`));
       if (!res.passed) {
@@ -538,7 +568,11 @@ program
         console.log(pc.green(`\nHealthcheck final en verde. Plan completado y modo por fases desactivado.`));
       } else {
         console.log(pc.red(`\nHealthcheck fallido. Hotfix abierto: ${pc.bold(res.hotfixTask)}`));
-        console.log(pc.yellow(`Corrige el bug y vuelve a ejecutar: agt phase:health`));
+        if (res.blocked) {
+          console.log(pc.red(`Plan bloqueado por límite de intentos. Revisa el bug y reanuda con: agt phase:resume`));
+        } else {
+          console.log(pc.yellow(`Corrige el bug y vuelve a ejecutar: agt phase:health`));
+        }
       }
       console.log(pc.dim(`Bitácora: ${res.logPath}\n`));
       if (!res.passed) {
@@ -557,9 +591,14 @@ program
 program
   .command('phase:status [planId]')
   .description('Muestra el estado del plan por fases (activo por defecto)')
-  .action((planId) => {
+  .option('--json', 'Imprime el estado completo en JSON (para hooks y scripts)')
+  .action((planId, options) => {
     try {
       const plan = getPhasePlan(planId);
+      if (options.json) {
+        console.log(JSON.stringify(plan, null, 2));
+        return;
+      }
       console.log(pc.cyan(`\nPlan ${pc.bold(plan.id)}: ${plan.title} [${pc.yellow(plan.status)}]\n`));
       plan.phases.forEach((p, i) => {
         const color = p.status === 'DONE' ? pc.green : p.status === 'FIXING' ? pc.red : p.status === 'IN_PROGRESS' ? pc.yellow : pc.dim;
@@ -572,6 +611,98 @@ program
       console.log(pc.dim(`\nBitácora: docs/bitacora/${plan.id}.md\n`));
     } catch (error) {
       console.error(pc.red(`\n${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: phase:resume [planId]
+ * Reanuda un plan bloqueado por límite de intentos.
+ */
+program
+  .command('phase:resume [planId]')
+  .description('Reanuda un plan bloqueado por límite de intentos')
+  .option('-n, --note <texto>', 'Nota para la bitácora (qué se cambió para desbloquear)', '')
+  .action((planId, options) => {
+    try {
+      const { plan, logPath } = resumePhasedPlan({ planId, note: options.note });
+      console.log(pc.green(`\nPlan ${pc.bold(plan.id)} reanudado en estado ${plan.status}.`));
+      console.log(pc.dim(`Bitácora: ${logPath}\n`));
+    } catch (error) {
+      console.error(pc.red(`\nError: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: hook:stop
+ * Hook Stop de Claude Code: impide que el agente termine mientras el plan por fases tenga trabajo pendiente.
+ */
+program
+  .command('hook:stop')
+  .description('Hook Stop para Claude Code: bloquea el cierre mientras el plan por fases no termine')
+  .option('--max-idle <n>', 'Bloqueos seguidos sin progreso antes de permitir el cierre', '2')
+  .action((options) => {
+    try {
+      const decision = evaluateStopHook({ maxIdleBlocks: parseInt(options.maxIdle, 10) || 2 });
+      if (decision.block) {
+        // Protocolo de hooks de Claude Code: decision "block" + reason hace que el agente continúe
+        console.log(JSON.stringify({ decision: 'block', reason: decision.reason }));
+      }
+    } catch {
+      // Ante cualquier error el hook nunca debe impedir que el agente se detenga
+    }
+    process.exit(0);
+  });
+
+/**
+ * COMANDO: hook:install
+ * Registra el hook Stop del agente en .claude/settings.json del proyecto.
+ */
+program
+  .command('hook:install')
+  .description('Registra el hook Stop del agente en .claude/settings.json (Claude Code)')
+  .action(() => {
+    try {
+      const res = installStopHook();
+      const msg = res.installed ? pc.green(`\nHook Stop registrado en ${res.path}\n`) : pc.yellow(`\nEl hook Stop ya estaba registrado en ${res.path}\n`);
+      console.log(msg);
+    } catch (error) {
+      console.error(pc.red(`\nError: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: next [planId]
+ * Muestra la siguiente acción concreta del flujo por fases.
+ */
+program
+  .command('next [planId]')
+  .description('Muestra la siguiente acción del flujo por fases (qué hacer ahora)')
+  .option('--json', 'Imprime la acción en JSON (para hooks y scripts)')
+  .action((planId, options) => {
+    try {
+      const step = getNextStep({ planId });
+      if (options.json) {
+        console.log(JSON.stringify(step, null, 2));
+        return;
+      }
+      const color = step.done ? pc.green : pc.yellow;
+      console.log(color(`
+[${step.action}]${step.task ? ` ${pc.bold(step.task)}` : ''}`));
+      console.log(pc.white(`  ${step.instructions}`));
+      if (step.cli) {
+        console.log(pc.dim(`  Siguiente comando: ${step.cli}`));
+      }
+      if (step.progress) {
+        console.log(pc.dim(`  Progreso: ${step.progress.done}/${step.progress.total} fases`));
+      }
+      console.log();
+    } catch (error) {
+      console.error(pc.red(`
+Error: ${error.message}
+`));
       process.exit(1);
     }
   });
