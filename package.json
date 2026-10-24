@@ -1,6 +1,6 @@
 {
   "name": "agente-dev",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "CLI y Orquestador de Flujo de Trabajo Autónomo de Entrega de Software",
   "type": "module",
   "main": "src/index.js",

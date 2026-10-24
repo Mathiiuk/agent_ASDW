@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-10-24T19:50:09.822Z",
+  "updatedAt": "2026-10-24T22:32:37.905Z",
   "project": "agente_dev",
   "metrics": {
-    "totalNodes": 35,
-    "totalEdges": 111,
-    "totalTasks": 10,
+    "totalNodes": 44,
+    "totalEdges": 146,
+    "totalTasks": 13,
     "totalLessons": 3
   },
   "nodes": [
@@ -22,34 +22,36 @@
       "id": "src/index.js",
       "label": "index.js",
       "type": "module",
-      "sizeBytes": 453,
-      "lineCount": 21,
+      "sizeBytes": 814,
+      "lineCount": 30,
       "imports": []
     },
     {
       "id": "src/init.js",
       "label": "init.js",
       "type": "module",
-      "sizeBytes": 10068,
-      "lineCount": 265,
+      "sizeBytes": 10444,
+      "lineCount": 275,
       "imports": [
         "node:fs",
         "node:path",
-        "node:url"
+        "node:url",
+        "./stop-hook.js"
       ]
     },
     {
       "id": "src/mcp-server.js",
       "label": "mcp-server.js",
       "type": "module",
-      "sizeBytes": 11808,
-      "lineCount": 310,
+      "sizeBytes": 13980,
+      "lineCount": 362,
       "imports": [
         "@modelcontextprotocol/sdk/server/index.js",
         "@modelcontextprotocol/sdk/server/stdio.js",
         "@modelcontextprotocol/sdk/types.js",
         "node:process",
-        "./index.js"
+        "./index.js",
+        "./project-root.js"
       ]
     },
     {
@@ -66,11 +68,22 @@
       ]
     },
     {
+      "id": "src/next-step.js",
+      "label": "next-step.js",
+      "type": "module",
+      "sizeBytes": 4694,
+      "lineCount": 126,
+      "imports": [
+        "node:path",
+        "./phase-runner.js"
+      ]
+    },
+    {
       "id": "src/phase-runner.js",
       "label": "phase-runner.js",
       "type": "module",
-      "sizeBytes": 19358,
-      "lineCount": 475,
+      "sizeBytes": 22631,
+      "lineCount": 548,
       "imports": [
         "node:fs",
         "node:path",
@@ -78,6 +91,17 @@
         "./task-manager.js",
         "./validator.js",
         "./workflow-runner.js"
+      ]
+    },
+    {
+      "id": "src/project-root.js",
+      "label": "project-root.js",
+      "type": "module",
+      "sizeBytes": 1067,
+      "lineCount": 27,
+      "imports": [
+        "node:fs",
+        "node:path"
       ]
     },
     {
@@ -104,6 +128,19 @@
         "node:path",
         "@cucumber/cucumber",
         "node:assert"
+      ]
+    },
+    {
+      "id": "src/stop-hook.js",
+      "label": "stop-hook.js",
+      "type": "module",
+      "sizeBytes": 4374,
+      "lineCount": 112,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "./next-step.js",
+        "./phase-runner.js"
       ]
     },
     {
@@ -148,8 +185,8 @@
       "id": "bin/agente-dev.js",
       "label": "agente-dev.js",
       "type": "cli",
-      "sizeBytes": 21803,
-      "lineCount": 598,
+      "sizeBytes": 26331,
+      "lineCount": 729,
       "imports": [
         "commander",
         "picocolors",
@@ -253,6 +290,22 @@
       ]
     },
     {
+      "id": "tests/next-step.test.js",
+      "label": "next-step.test.js",
+      "type": "test",
+      "sizeBytes": 3234,
+      "lineCount": 75,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "../src/phase-runner.js",
+        "../src/next-step.js",
+        "../src/mcp-server.js"
+      ]
+    },
+    {
       "id": "tests/phase-runner.test.js",
       "label": "phase-runner.test.js",
       "type": "test",
@@ -265,6 +318,22 @@
         "node:os",
         "../src/task-manager.js",
         "../src/phase-runner.js"
+      ]
+    },
+    {
+      "id": "tests/project-root.test.js",
+      "label": "project-root.test.js",
+      "type": "test",
+      "sizeBytes": 2456,
+      "lineCount": 59,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "node:child_process",
+        "../src/project-root.js",
+        "../src/mcp-server.js"
       ]
     },
     {
@@ -291,6 +360,23 @@
         "vitest",
         "node:fs",
         "../src/scaffolder.js"
+      ]
+    },
+    {
+      "id": "tests/stop-hook.test.js",
+      "label": "stop-hook.test.js",
+      "type": "test",
+      "sizeBytes": 5810,
+      "lineCount": 132,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "node:child_process",
+        "../src/phase-runner.js",
+        "../src/next-step.js",
+        "../src/stop-hook.js"
       ]
     },
     {
@@ -402,6 +488,27 @@
       "type": "task",
       "status": "READY_FOR_PR",
       "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0012",
+      "label": "AGT-0012: projectRoot configurable en MCP y CLI",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0013",
+      "label": "AGT-0013: Tool next_step y salida JSON",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0014",
+      "label": "AGT-0014: Hook Stop con limite de intentos",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
     }
   ],
   "edges": [
@@ -423,6 +530,11 @@
     {
       "from": "src/init.js",
       "to": "node:url",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/init.js",
+      "to": "./stop-hook.js",
       "relation": "depends_on"
     },
     {
@@ -451,6 +563,11 @@
       "relation": "depends_on"
     },
     {
+      "from": "src/mcp-server.js",
+      "to": "./project-root.js",
+      "relation": "depends_on"
+    },
+    {
       "from": "src/memory.js",
       "to": "node:fs",
       "relation": "depends_on"
@@ -468,6 +585,16 @@
     {
       "from": "src/memory.js",
       "to": "...",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/next-step.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/next-step.js",
+      "to": "./phase-runner.js",
       "relation": "depends_on"
     },
     {
@@ -498,6 +625,16 @@
     {
       "from": "src/phase-runner.js",
       "to": "./workflow-runner.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/project-root.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/project-root.js",
+      "to": "node:path",
       "relation": "depends_on"
     },
     {
@@ -538,6 +675,26 @@
     {
       "from": "src/scaffolder.js",
       "to": "node:assert",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/stop-hook.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/stop-hook.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/stop-hook.js",
+      "to": "./next-step.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/stop-hook.js",
+      "to": "./phase-runner.js",
       "relation": "depends_on"
     },
     {
@@ -776,6 +933,41 @@
       "relation": "depends_on"
     },
     {
+      "from": "tests/next-step.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/next-step.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/next-step.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/next-step.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/next-step.test.js",
+      "to": "../src/phase-runner.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/next-step.test.js",
+      "to": "../src/next-step.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/next-step.test.js",
+      "to": "../src/mcp-server.js",
+      "relation": "depends_on"
+    },
+    {
       "from": "tests/phase-runner.test.js",
       "to": "vitest",
       "relation": "depends_on"
@@ -803,6 +995,41 @@
     {
       "from": "tests/phase-runner.test.js",
       "to": "../src/phase-runner.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/project-root.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/project-root.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/project-root.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/project-root.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/project-root.test.js",
+      "to": "node:child_process",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/project-root.test.js",
+      "to": "../src/project-root.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/project-root.test.js",
+      "to": "../src/mcp-server.js",
       "relation": "depends_on"
     },
     {
@@ -843,6 +1070,46 @@
     {
       "from": "tests/scaffolder.test.js",
       "to": "../src/scaffolder.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "node:child_process",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "../src/phase-runner.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "../src/next-step.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/stop-hook.test.js",
+      "to": "../src/stop-hook.js",
       "relation": "depends_on"
     },
     {
@@ -958,6 +1225,21 @@
     {
       "from": "task:AGT-0011",
       "to": ".agents/workflow/tasks/AGT-0011.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0012",
+      "to": ".agents/workflow/tasks/AGT-0012.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0013",
+      "to": ".agents/workflow/tasks/AGT-0013.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0014",
+      "to": ".agents/workflow/tasks/AGT-0014.yml",
       "relation": "manifested_by"
     }
   ],

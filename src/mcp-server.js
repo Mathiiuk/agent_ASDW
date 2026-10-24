@@ -336,7 +336,7 @@ export const TOOL_HANDLERS = {
  */
 export async function startMcpServer() {
   const server = new Server(
-    { name: 'agente-dev-mcp', version: '1.1.0' },
+    { name: 'agente-dev-mcp', version: '1.2.0' },
     { capabilities: { tools: {} } }
   );
 

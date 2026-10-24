@@ -1,8 +1,8 @@
 id: PLAN-002
 title: Automatizacion autonoma de punta a punta
-status: HEALTHCHECK
+status: COMPLETED
 created_at: '2026-10-24T22:23:13.194Z'
-updated_at: '2026-10-24T22:31:32.130Z'
+updated_at: '2026-10-24T22:32:48.053Z'
 current_phase: 2
 phases:
   - task_id: AGT-0012
@@ -26,8 +26,16 @@ healthcheck:
   commands:
     unit_tests: pnpm test
     bdd_tests: pnpm test:bdd
-  runs: 0
-  last_result: null
+  runs: 1
+  last_result:
+    at: '2026-10-24T22:32:48.050Z'
+    passed: true
+    gates:
+      - gate: unit_tests
+        passed: true
+      - gate: bdd_tests
+        passed: true
+  failed_streak: 0
 log:
   - at: '2026-10-24T22:23:13.207Z'
     event: PLAN_START
@@ -53,3 +61,6 @@ log:
   - at: '2026-10-24T22:31:32.129Z'
     event: PHASES_DONE
     detail: Todas las fases completadas. Pendiente healthcheck final.
+  - at: '2026-10-24T22:32:48.052Z'
+    event: HEALTHCHECK_PASS
+    detail: Healthcheck final en verde (ejecución 1). Plan completado.

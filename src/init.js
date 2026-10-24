@@ -126,7 +126,7 @@ Estás operando en un entorno de desarrollo estructurado para Agentes de IA.
 
 Para ejecutar tareas, asume los roles especializados (Frontend, Backend, DevOps, etc.) definidos en la carpeta \`.agents/skills/\`.
 
-Para entregas de varias features usa el **modo de desarrollo por fases** (\`agt phase:start\` / \`phase:check\` / \`phase:health\`, o las tools MCP equivalentes): feat + check → siguiente feat, fix si un check falla, healthcheck final y hotfix si falla. Todo queda documentado en \`docs/bitacora/<PLAN-ID>.md\`.
+Para entregas de varias features usa el **modo de desarrollo por fases** (\`agt phase:start\` / \`phase:check\` / \`phase:health\`, o las tools MCP equivalentes): feat + check → siguiente feat, fix si un check falla, healthcheck final y hotfix si falla. Todo queda documentado en \`docs/bitacora/<PLAN-ID>.md\`. Consulta siempre la siguiente acción con la tool \`next_step\` (o \`agt next\`) y repite hasta recibir \`done: true\`.
 `;
 
   // Archivos clave leídos por los IDEs y extensiones más populares
