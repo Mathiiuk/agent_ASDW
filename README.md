@@ -240,6 +240,26 @@ Si estás trabajando en la rama de una tarea (ej. `feat/AGT-0021`) e intentas ha
 
 ---
 
+### 12. Modo de Desarrollo por Fases (`agt phase:*`)
+Divide un desarrollo grande en features secuenciales. Cada feat se valida con un **check** antes de pasar a la siguiente; si aparece un bug se abre un **fix**, y al final se corre un **healthcheck** global (si falla, se abre un **hotfix**). Todo queda registrado en la bitácora `docs/bitacora/<PLAN-ID>.md`.
+
+```bash
+# Activa el modo por fases (las tareas feat se crean si no existen)
+agt phase:start PLAN-001 -t "Portal de clientes" -p "AGT-0012:Login con OAuth" -p "AGT-0013:Dashboard"
+
+# Al terminar la feat actual: check → avanza a la siguiente o abre AGT-0012-FIX-1
+agt phase:check
+
+# Con todas las fases en verde: healthcheck final → COMPLETED o abre PLAN-001-HOTFIX-1
+agt phase:health
+
+# Estado del plan activo
+agt phase:status
+```
+*Opcional:* `--health "unit_tests=pnpm test" --health "build=pnpm build"` define los comandos del healthcheck final (por defecto `pnpm test` y `pnpm test:bdd`).
+
+---
+
 ## 📂 Estructura del Proyecto
 
 ```text

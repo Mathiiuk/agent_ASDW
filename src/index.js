@@ -24,3 +24,6 @@ export * from './scaffolder.js';
 
 // Exportamos el Servidor MCP nativo
 export * from './mcp-server.js';
+
+// Exportamos el modo de desarrollo por fases (feat + check, fix/hotfix, healthcheck y bitácora)
+export * from './phase-runner.js';
