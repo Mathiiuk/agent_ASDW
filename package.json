@@ -12,7 +12,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:bdd": "cucumber-js",
-    "cli": "node ./bin/agente-dev.js"
+    "cli": "node ./bin/agente-dev.js",
+    "agt:task": "agt task:new",
+    "agt:loop": "agt task:loop",
+    "agt:memory": "agt memory:sync"
   },
   "keywords": [
     "agent",

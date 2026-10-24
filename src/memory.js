@@ -34,12 +34,12 @@ export function ensureMemoryDir(projectRoot = process.cwd()) {
  */
 function extractImports(content) {
   const imports = [];
-  // Regex para capturar imports estáticos: import ... from '...'
-  const importRegex = /import\s+(?:[\w\s{},*]+from\s+)?['"]([^'"]+)['"]/g;
+  // Regex para capturar imports estáticos (import ... from '...') y módulos CommonJS (require('...'))
+  const importRegex = /(?:import\s+(?:[\w\s{},*]+from\s+)?['"]([^'"]+)['"]|require\s*\(\s*['"]([^'"]+)['"]\s*\))/g;
   let match;
 
   while ((match = importRegex.exec(content)) !== null) {
-    imports.push(match[1]);
+    imports.push(match[1] || match[2]);
   }
 
   return imports;
@@ -61,8 +61,8 @@ function scanFiles(dir, extensions = ['.js', '.ts', '.jsx', '.tsx', '.json', '.f
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
-    // Ignoramos node_modules y .git
-    if (entry.name === 'node_modules' || entry.name === '.git') {
+    // Ignoramos node_modules, .git, dist, build, .next, etc.
+    if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'build' || entry.name === '.next' || entry.name === 'coverage') {
       continue;
     }
 
@@ -90,13 +90,15 @@ export function buildKnowledgeGraph(projectRoot = process.cwd()) {
   const nodes = [];
   const edges = [];
 
-  // 1. ESCANEAMOS ARCHIVOS FUENTE EN src/, bin/, tests/
-  const scanDirs = ['src', 'bin', 'tests'];
+  // 1. ESCANEAMOS ARCHIVOS FUENTE EN src/, bin/, tests/, backend/, frontend/, automation/
+  const scanDirs = ['src', 'bin', 'tests', 'backend', path.join('frontend', 'src'), 'automation'];
   const allFiles = [];
 
   for (const sub of scanDirs) {
     const fullSub = path.join(projectRoot, sub);
-    allFiles.push(...scanFiles(fullSub));
+    if (fs.existsSync(fullSub)) {
+      allFiles.push(...scanFiles(fullSub));
+    }
   }
 
   // 2. CONSTRUIMOS NODOS Y RELACIONES DE CÓDIGO
