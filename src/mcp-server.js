@@ -22,6 +22,7 @@ import {
   runFinalHealthcheck,
   getPhasePlan,
 } from './index.js';
+import { resolveProjectRoot, PROJECT_ROOT_ENV } from './project-root.js';
 
 /**
  * Catálogo de herramientas del Agente expuestas vía MCP.
@@ -203,6 +204,30 @@ export const TOOLS = [
   },
 ];
 
+// Toda tool acepta un projectRoot opcional para operar sobre otro proyecto que el cwd del servidor
+for (const tool of TOOLS) {
+  tool.inputSchema.properties.projectRoot = {
+    type: 'string',
+    description: `Ruta absoluta del proyecto (default: variable ${PROJECT_ROOT_ENV} o el directorio del servidor)`,
+  };
+}
+
+/**
+ * Ejecuta una tool por nombre resolviendo antes la raíz del proyecto.
+ *
+ * @param {string} name - Nombre de la tool
+ * @param {object} [args] - Argumentos crudos de la llamada MCP
+ * @returns {Promise<object>} - Resultado serializable del handler
+ */
+export async function callTool(name, args = {}) {
+  const handler = TOOL_HANDLERS[name];
+  if (!handler) {
+    throw new Error(`Tool no reconocida: ${name}`);
+  }
+  const { projectRoot, ...rest } = args;
+  return handler(rest, resolveProjectRoot(projectRoot));
+}
+
 /**
  * Implementación de cada herramienta. Cada handler recibe los argumentos crudos
  * de la llamada MCP y el directorio de trabajo (cwd), y retorna un objeto plano
@@ -281,18 +306,8 @@ export async function startMcpServer() {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const cwd = process.cwd();
-    const handler = TOOL_HANDLERS[request.params.name];
-
-    if (!handler) {
-      return {
-        content: [{ type: 'text', text: `Tool no reconocida: ${request.params.name}` }],
-        isError: true,
-      };
-    }
-
     try {
-      const result = await handler(request.params.arguments || {}, cwd);
+      const result = await callTool(request.params.name, request.params.arguments || {});
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

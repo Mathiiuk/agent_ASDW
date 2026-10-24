@@ -25,6 +25,7 @@ import {
   getPhasePlan,
   parsePhaseArg,
   DEFAULT_HEALTH_COMMANDS,
+  resolveProjectRoot,
 } from '../src/index.js';
 
 /**
@@ -43,7 +44,20 @@ const program = new Command();
 program
   .name('agt')
   .description('CLI del Agente de Workflow Autónomo - Orquestador de Tareas y Ramas Git')
-  .version('1.1.0');
+  .version('1.1.0')
+  .option('-C, --root <dir>', 'Raíz del proyecto sobre la que operar (default: AGT_PROJECT_ROOT o el directorio actual)');
+
+// Antes de cada comando fijamos la raíz del proyecto: todos los módulos usan process.cwd() por defecto
+program.hook('preAction', () => {
+  try {
+    process.chdir(resolveProjectRoot(program.opts().root));
+  } catch (error) {
+    console.error(pc.red(`
+Error: ${error.message}
+`));
+    process.exit(1);
+  }
+});
 
 /**
  * COMANDO: init

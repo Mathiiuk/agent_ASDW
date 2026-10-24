@@ -1,0 +1,42 @@
+id: PLAN-002
+title: Automatizacion autonoma de punta a punta
+status: ACTIVE
+created_at: '2026-10-24T22:23:13.194Z'
+updated_at: '2026-10-24T22:25:08.083Z'
+current_phase: 1
+phases:
+  - task_id: AGT-0012
+    title: projectRoot configurable en MCP y CLI
+    status: DONE
+    checks: 1
+    fixes: []
+  - task_id: AGT-0013
+    title: Tool next_step y salida JSON
+    status: IN_PROGRESS
+    checks: 0
+    fixes: []
+  - task_id: AGT-0014
+    title: Hook Stop con limite de intentos
+    status: PENDING
+    checks: 0
+    fixes: []
+fixes: []
+healthcheck:
+  commands:
+    unit_tests: pnpm test
+    bdd_tests: pnpm test:bdd
+  runs: 0
+  last_result: null
+log:
+  - at: '2026-10-24T22:23:13.207Z'
+    event: PLAN_START
+    detail: 'Modo por fases activado con 3 fase(s): AGT-0012 → AGT-0013 → AGT-0014'
+  - at: '2026-10-24T22:23:13.207Z'
+    event: FEAT_START
+    detail: 'Inicia fase 1: `AGT-0012` projectRoot configurable en MCP y CLI'
+  - at: '2026-10-24T22:25:08.079Z'
+    event: FEAT_CHECK_PASS
+    detail: Check de `AGT-0012` en verde (intento 1)
+  - at: '2026-10-24T22:25:08.082Z'
+    event: FEAT_START
+    detail: 'Inicia fase 2: `AGT-0013` Tool next_step y salida JSON'

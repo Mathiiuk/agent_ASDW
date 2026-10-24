@@ -325,7 +325,11 @@ Agrega la siguiente configuración en tu panel de herramientas MCP o en tu archi
   }
 }
 ```
-*Nota:* `"command": "agt"` requiere haber enlazado la CLI (`npm link`). Si no, usa `"command": "node"` con `"args": ["/ruta/a/agent_ASDW/bin/agente-dev.js", "mcp"]`. El servidor opera sobre el directorio de trabajo del cliente, así que ábrelo desde la raíz de tu proyecto.
+*Nota:* `"command": "agt"` requiere haber enlazado la CLI (`npm link`). Si no, usa `"command": "node"` con `"args": ["/ruta/a/agent_ASDW/bin/agente-dev.js", "mcp"]`. El servidor opera sobre el directorio desde donde el cliente lo lanza. Si tu cliente lo lanza desde otro lugar (por ejemplo Claude Desktop), fija la raíz del proyecto con la variable `AGT_PROJECT_ROOT`:
+```json
+{ "mcpServers": { "agente-dev": { "command": "agt", "args": ["mcp"], "env": { "AGT_PROJECT_ROOT": "/ruta/a/mi-proyecto" } } } }
+```
+Además, toda tool acepta un argumento opcional `projectRoot` (prioridad: `projectRoot` > `AGT_PROJECT_ROOT` > directorio actual). En la CLI, el equivalente es `agt --root /ruta/a/mi-proyecto <comando>`.
 
 **Herramientas expuestas (acción, no solo lectura):**
 
