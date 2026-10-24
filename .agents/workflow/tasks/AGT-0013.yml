@@ -2,7 +2,7 @@ id: AGT-0013
 external_ref: ''
 title: Tool next_step y salida JSON
 type: feat
-status: IN_PROGRESS
+status: READY_FOR_PR
 priority: medium
 owner: team-agent
 base_branch: main

@@ -26,6 +26,7 @@ import {
   parsePhaseArg,
   DEFAULT_HEALTH_COMMANDS,
   resolveProjectRoot,
+  getNextStep,
 } from '../src/index.js';
 
 /**
@@ -571,9 +572,14 @@ program
 program
   .command('phase:status [planId]')
   .description('Muestra el estado del plan por fases (activo por defecto)')
-  .action((planId) => {
+  .option('--json', 'Imprime el estado completo en JSON (para hooks y scripts)')
+  .action((planId, options) => {
     try {
       const plan = getPhasePlan(planId);
+      if (options.json) {
+        console.log(JSON.stringify(plan, null, 2));
+        return;
+      }
       console.log(pc.cyan(`\nPlan ${pc.bold(plan.id)}: ${plan.title} [${pc.yellow(plan.status)}]\n`));
       plan.phases.forEach((p, i) => {
         const color = p.status === 'DONE' ? pc.green : p.status === 'FIXING' ? pc.red : p.status === 'IN_PROGRESS' ? pc.yellow : pc.dim;
@@ -586,6 +592,40 @@ program
       console.log(pc.dim(`\nBitácora: docs/bitacora/${plan.id}.md\n`));
     } catch (error) {
       console.error(pc.red(`\n${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: next [planId]
+ * Muestra la siguiente acción concreta del flujo por fases.
+ */
+program
+  .command('next [planId]')
+  .description('Muestra la siguiente acción del flujo por fases (qué hacer ahora)')
+  .option('--json', 'Imprime la acción en JSON (para hooks y scripts)')
+  .action((planId, options) => {
+    try {
+      const step = getNextStep({ planId });
+      if (options.json) {
+        console.log(JSON.stringify(step, null, 2));
+        return;
+      }
+      const color = step.done ? pc.green : pc.yellow;
+      console.log(color(`
+[${step.action}]${step.task ? ` ${pc.bold(step.task)}` : ''}`));
+      console.log(pc.white(`  ${step.instructions}`));
+      if (step.cli) {
+        console.log(pc.dim(`  Siguiente comando: ${step.cli}`));
+      }
+      if (step.progress) {
+        console.log(pc.dim(`  Progreso: ${step.progress.done}/${step.progress.total} fases`));
+      }
+      console.log();
+    } catch (error) {
+      console.error(pc.red(`
+Error: ${error.message}
+`));
       process.exit(1);
     }
   });

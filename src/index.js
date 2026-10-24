@@ -21,3 +21,6 @@ export * from './phase-runner.js';
 
 // Exportamos la resolución de la raíz del proyecto (argumento > AGT_PROJECT_ROOT > cwd)
 export * from './project-root.js';
+
+// Exportamos el cálculo de la siguiente acción del flujo (next_step)
+export * from './next-step.js';

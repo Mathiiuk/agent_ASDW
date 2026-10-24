@@ -21,6 +21,7 @@ import {
   checkCurrentPhase,
   runFinalHealthcheck,
   getPhasePlan,
+  getNextStep,
 } from './index.js';
 import { resolveProjectRoot, PROJECT_ROOT_ENV } from './project-root.js';
 
@@ -202,6 +203,16 @@ export const TOOLS = [
       required: [],
     },
   },
+  {
+    name: 'next_step',
+    description:
+      'Devuelve la siguiente acción concreta del flujo por fases (IMPLEMENT_FEATURE, FIX_BUG, RUN_HEALTHCHECK, FIX_HOTFIX, BLOCKED, DONE) con la tarea, artefactos a leer, diagnóstico y la tool a invocar después. Trabaja en bucle: llamar a next_step, ejecutar la acción y repetir hasta recibir done = true.',
+    inputSchema: {
+      type: 'object',
+      properties: { planId: { type: 'string', description: 'ID del plan (default: plan activo)' } },
+      required: [],
+    },
+  },
 ];
 
 // Toda tool acepta un projectRoot opcional para operar sobre otro proyecto que el cwd del servidor
@@ -289,6 +300,8 @@ export const TOOL_HANDLERS = {
   run_final_healthcheck: async ({ planId }, cwd) => runFinalHealthcheck({ planId: planId || null, projectRoot: cwd }),
 
   get_phased_plan: async ({ planId }, cwd) => getPhasePlan(planId || null, cwd),
+
+  next_step: async ({ planId }, cwd) => getNextStep({ planId: planId || null, projectRoot: cwd }),
 };
 
 /**
