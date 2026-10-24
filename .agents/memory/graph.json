@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-09-14T12:11:17.382Z",
-  "project": "agent_ASDW",
+  "updatedAt": "2026-10-24T19:50:09.822Z",
+  "project": "agente_dev",
   "metrics": {
-    "totalNodes": 31,
-    "totalEdges": 90,
-    "totalTasks": 9,
+    "totalNodes": 35,
+    "totalEdges": 111,
+    "totalTasks": 10,
     "totalLessons": 3
   },
   "nodes": [
@@ -12,8 +12,8 @@
       "id": "src/git.js",
       "label": "git.js",
       "type": "module",
-      "sizeBytes": 6727,
-      "lineCount": 176,
+      "sizeBytes": 5645,
+      "lineCount": 160,
       "imports": [
         "node:child_process"
       ]
@@ -22,16 +22,16 @@
       "id": "src/index.js",
       "label": "index.js",
       "type": "module",
-      "sizeBytes": 856,
-      "lineCount": 27,
+      "sizeBytes": 453,
+      "lineCount": 21,
       "imports": []
     },
     {
       "id": "src/init.js",
       "label": "init.js",
       "type": "module",
-      "sizeBytes": 9850,
-      "lineCount": 262,
+      "sizeBytes": 10068,
+      "lineCount": 265,
       "imports": [
         "node:fs",
         "node:path",
@@ -42,8 +42,8 @@
       "id": "src/mcp-server.js",
       "label": "mcp-server.js",
       "type": "module",
-      "sizeBytes": 9138,
-      "lineCount": 248,
+      "sizeBytes": 11808,
+      "lineCount": 310,
       "imports": [
         "@modelcontextprotocol/sdk/server/index.js",
         "@modelcontextprotocol/sdk/server/stdio.js",
@@ -56,19 +56,35 @@
       "id": "src/memory.js",
       "label": "memory.js",
       "type": "module",
-      "sizeBytes": 11862,
-      "lineCount": 336,
+      "sizeBytes": 11252,
+      "lineCount": 328,
       "imports": [
         "node:fs",
         "node:path",
-        "./task-manager.js"
+        "./task-manager.js",
+        "..."
+      ]
+    },
+    {
+      "id": "src/phase-runner.js",
+      "label": "phase-runner.js",
+      "type": "module",
+      "sizeBytes": 19358,
+      "lineCount": 475,
+      "imports": [
+        "node:fs",
+        "node:path",
+        "js-yaml",
+        "./task-manager.js",
+        "./validator.js",
+        "./workflow-runner.js"
       ]
     },
     {
       "id": "src/release-manager.js",
       "label": "release-manager.js",
       "type": "module",
-      "sizeBytes": 3901,
+      "sizeBytes": 3797,
       "lineCount": 105,
       "imports": [
         "node:fs",
@@ -81,8 +97,8 @@
       "id": "src/scaffolder.js",
       "label": "scaffolder.js",
       "type": "module",
-      "sizeBytes": 3095,
-      "lineCount": 85,
+      "sizeBytes": 2987,
+      "lineCount": 83,
       "imports": [
         "node:fs",
         "node:path",
@@ -94,8 +110,8 @@
       "id": "src/task-manager.js",
       "label": "task-manager.js",
       "type": "module",
-      "sizeBytes": 11688,
-      "lineCount": 300,
+      "sizeBytes": 11075,
+      "lineCount": 294,
       "imports": [
         "node:fs",
         "node:path",
@@ -107,8 +123,8 @@
       "id": "src/validator.js",
       "label": "validator.js",
       "type": "module",
-      "sizeBytes": 5684,
-      "lineCount": 187,
+      "sizeBytes": 5140,
+      "lineCount": 178,
       "imports": [
         "node:fs",
         "node:path",
@@ -119,8 +135,8 @@
       "id": "src/workflow-runner.js",
       "label": "workflow-runner.js",
       "type": "module",
-      "sizeBytes": 6912,
-      "lineCount": 169,
+      "sizeBytes": 6410,
+      "lineCount": 160,
       "imports": [
         "node:fs",
         "node:path",
@@ -132,8 +148,8 @@
       "id": "bin/agente-dev.js",
       "label": "agente-dev.js",
       "type": "cli",
-      "sizeBytes": 16584,
-      "lineCount": 462,
+      "sizeBytes": 21803,
+      "lineCount": 598,
       "imports": [
         "commander",
         "picocolors",
@@ -144,7 +160,7 @@
       "id": "tests/bdd/steps/AGT-0010.steps.js",
       "label": "AGT-0010.steps.js",
       "type": "test",
-      "sizeBytes": 1974,
+      "sizeBytes": 1909,
       "lineCount": 66,
       "imports": [
         "@cucumber/cucumber",
@@ -152,10 +168,26 @@
       ]
     },
     {
+      "id": "tests/bdd/steps/AGT-0011.steps.js",
+      "label": "AGT-0011.steps.js",
+      "type": "test",
+      "sizeBytes": 2973,
+      "lineCount": 84,
+      "imports": [
+        "@cucumber/cucumber",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "node:assert",
+        "../../../src/task-manager.js",
+        "../../../src/phase-runner.js"
+      ]
+    },
+    {
       "id": "tests/bdd/steps/task-steps.js",
       "label": "task-steps.js",
       "type": "test",
-      "sizeBytes": 5147,
+      "sizeBytes": 5017,
       "lineCount": 131,
       "imports": [
         "@cucumber/cucumber",
@@ -170,8 +202,8 @@
       "id": "tests/git.test.js",
       "label": "git.test.js",
       "type": "test",
-      "sizeBytes": 2581,
-      "lineCount": 62,
+      "sizeBytes": 2281,
+      "lineCount": 57,
       "imports": [
         "vitest",
         "../src/git.js"
@@ -181,8 +213,8 @@
       "id": "tests/init.test.js",
       "label": "init.test.js",
       "type": "test",
-      "sizeBytes": 2899,
-      "lineCount": 63,
+      "sizeBytes": 2429,
+      "lineCount": 56,
       "imports": [
         "vitest",
         "node:fs",
@@ -195,8 +227,8 @@
       "id": "tests/mcp-server.test.js",
       "label": "mcp-server.test.js",
       "type": "test",
-      "sizeBytes": 3828,
-      "lineCount": 89,
+      "sizeBytes": 4440,
+      "lineCount": 102,
       "imports": [
         "vitest",
         "node:fs",
@@ -209,8 +241,8 @@
       "id": "tests/memory.test.js",
       "label": "memory.test.js",
       "type": "test",
-      "sizeBytes": 3662,
-      "lineCount": 102,
+      "sizeBytes": 3411,
+      "lineCount": 98,
       "imports": [
         "vitest",
         "node:fs",
@@ -221,11 +253,26 @@
       ]
     },
     {
+      "id": "tests/phase-runner.test.js",
+      "label": "phase-runner.test.js",
+      "type": "test",
+      "sizeBytes": 5484,
+      "lineCount": 136,
+      "imports": [
+        "vitest",
+        "node:fs",
+        "node:path",
+        "node:os",
+        "../src/task-manager.js",
+        "../src/phase-runner.js"
+      ]
+    },
+    {
       "id": "tests/release-manager.test.js",
       "label": "release-manager.test.js",
       "type": "test",
-      "sizeBytes": 1686,
-      "lineCount": 47,
+      "sizeBytes": 1631,
+      "lineCount": 46,
       "imports": [
         "vitest",
         "node:fs",
@@ -238,7 +285,7 @@
       "id": "tests/scaffolder.test.js",
       "label": "scaffolder.test.js",
       "type": "test",
-      "sizeBytes": 1978,
+      "sizeBytes": 1925,
       "lineCount": 54,
       "imports": [
         "vitest",
@@ -250,8 +297,8 @@
       "id": "tests/task-manager.test.js",
       "label": "task-manager.test.js",
       "type": "test",
-      "sizeBytes": 3999,
-      "lineCount": 102,
+      "sizeBytes": 3418,
+      "lineCount": 94,
       "imports": [
         "vitest",
         "node:fs",
@@ -264,8 +311,8 @@
       "id": "tests/validator.test.js",
       "label": "validator.test.js",
       "type": "test",
-      "sizeBytes": 2764,
-      "lineCount": 85,
+      "sizeBytes": 2669,
+      "lineCount": 83,
       "imports": [
         "vitest",
         "../src/validator.js"
@@ -275,8 +322,8 @@
       "id": "tests/workflow-runner.test.js",
       "label": "workflow-runner.test.js",
       "type": "test",
-      "sizeBytes": 4357,
-      "lineCount": 122,
+      "sizeBytes": 3971,
+      "lineCount": 116,
       "imports": [
         "vitest",
         "node:fs",
@@ -348,6 +395,13 @@
       "type": "task",
       "status": "PLANNED",
       "taskType": "feat"
+    },
+    {
+      "id": "task:AGT-0011",
+      "label": "AGT-0011: Modo de desarrollo por fases con healthcheck y bitacora",
+      "type": "task",
+      "status": "READY_FOR_PR",
+      "taskType": "feat"
     }
   ],
   "edges": [
@@ -409,6 +463,41 @@
     {
       "from": "src/memory.js",
       "to": "./task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/memory.js",
+      "to": "...",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/phase-runner.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/phase-runner.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/phase-runner.js",
+      "to": "js-yaml",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/phase-runner.js",
+      "to": "./task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/phase-runner.js",
+      "to": "./validator.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "src/phase-runner.js",
+      "to": "./workflow-runner.js",
       "relation": "depends_on"
     },
     {
@@ -532,6 +621,41 @@
       "relation": "depends_on"
     },
     {
+      "from": "tests/bdd/steps/AGT-0011.steps.js",
+      "to": "@cucumber/cucumber",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0011.steps.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0011.steps.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0011.steps.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0011.steps.js",
+      "to": "node:assert",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0011.steps.js",
+      "to": "../../../src/task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/bdd/steps/AGT-0011.steps.js",
+      "to": "../../../src/phase-runner.js",
+      "relation": "depends_on"
+    },
+    {
       "from": "tests/bdd/steps/task-steps.js",
       "to": "@cucumber/cucumber",
       "relation": "depends_on"
@@ -649,6 +773,36 @@
     {
       "from": "tests/memory.test.js",
       "to": "./db.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/phase-runner.test.js",
+      "to": "vitest",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/phase-runner.test.js",
+      "to": "node:fs",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/phase-runner.test.js",
+      "to": "node:path",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/phase-runner.test.js",
+      "to": "node:os",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/phase-runner.test.js",
+      "to": "../src/task-manager.js",
+      "relation": "depends_on"
+    },
+    {
+      "from": "tests/phase-runner.test.js",
+      "to": "../src/phase-runner.js",
       "relation": "depends_on"
     },
     {
@@ -799,6 +953,11 @@
     {
       "from": "task:AGT-0010",
       "to": ".agents/workflow/tasks/AGT-0010.yml",
+      "relation": "manifested_by"
+    },
+    {
+      "from": "task:AGT-0011",
+      "to": ".agents/workflow/tasks/AGT-0011.yml",
       "relation": "manifested_by"
     }
   ],

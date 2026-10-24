@@ -19,14 +19,31 @@ import {
   generateRelease,
   generateBddScaffold,
   startMcpServer,
+  startPhasedDevelopment,
+  checkCurrentPhase,
+  runFinalHealthcheck,
+  getPhasePlan,
+  parsePhaseArg,
+  DEFAULT_HEALTH_COMMANDS,
 } from '../src/index.js';
+
+/**
+ * Acumula valores de una opción repetible de Commander (ej: -p A -p B)
+ *
+ * @param {string} value - Valor recibido
+ * @param {string[]} previous - Valores acumulados
+ * @returns {string[]} - Lista actualizada
+ */
+function collect(value, previous) {
+  return previous.concat([value]);
+}
 
 const program = new Command();
 
 program
   .name('agt')
   .description('CLI del Agente de Workflow Autónomo - Orquestador de Tareas y Ramas Git')
-  .version('1.0.0');
+  .version('1.1.0');
 
 /**
  * COMANDO: init
@@ -426,6 +443,135 @@ program
       console.log(pc.dim(`  Archivo creado en: ${res.filePath}\n`));
     } catch (error) {
       console.error(pc.red(`\nError al generar scaffolding: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: phase:start <planId>
+ * Activa el modo de desarrollo por fases con una lista ordenada de features.
+ */
+program
+  .command('phase:start <planId>')
+  .description('Activa el modo de desarrollo por fases (feat + check → siguiente feat)')
+  .requiredOption('-t, --title <title>', 'Título del plan por fases')
+  .option('-p, --phase <TASK-ID:Título>', 'Fase (feat) en orden; repetible', collect, [])
+  .option('--health <gate=comando>', 'Comando del healthcheck final; repetible (por defecto: pnpm test y pnpm test:bdd)', collect, [])
+  .action((planId, options) => {
+    try {
+      const phases = options.phase.map(parsePhaseArg);
+      // Si se definieron comandos de healthcheck propios, reemplazan a los de por defecto
+      let healthCommands = DEFAULT_HEALTH_COMMANDS;
+      if (options.health.length > 0) {
+        healthCommands = {};
+        for (const entry of options.health) {
+          const sep = entry.indexOf('=');
+          if (sep <= 0) {
+            throw new Error(`Healthcheck inválido "${entry}". Formato esperado: <gate>=<comando>`);
+          }
+          healthCommands[entry.slice(0, sep).trim()] = entry.slice(sep + 1).trim();
+        }
+      }
+
+      const { plan, logPath } = startPhasedDevelopment({ id: planId, title: options.title, phases, healthCommands });
+
+      console.log(pc.green(`\nModo por fases activado: ${pc.bold(plan.id)} (${plan.phases.length} fase(s))`));
+      plan.phases.forEach((p, i) => console.log(pc.dim(`  ${i + 1}. ${p.task_id} - ${p.title}`)));
+      console.log(pc.yellow(`\nFase actual: ${pc.bold(plan.phases[0].task_id)}. Al terminarla ejecuta: agt phase:check`));
+      console.log(pc.dim(`Bitácora: ${logPath}\n`));
+    } catch (error) {
+      console.error(pc.red(`\nError al iniciar el modo por fases: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: phase:check [planId]
+ * Verifica la feat actual; si pasa avanza a la siguiente, si falla abre un fix.
+ */
+program
+  .command('phase:check [planId]')
+  .description('Ejecuta el check de la fase actual (avanza o abre un fix)')
+  .action((planId) => {
+    try {
+      const res = checkCurrentPhase({ planId });
+
+      if (res.passed) {
+        console.log(pc.green(`\nCheck en verde para ${pc.bold(res.phase.task_id)}.`));
+        if (res.nextPhase) {
+          console.log(pc.yellow(`Siguiente feat: ${pc.bold(res.nextPhase.task_id)} - ${res.nextPhase.title}`));
+        } else {
+          console.log(pc.cyan(`Todas las fases completadas. Ejecuta el healthcheck final: agt phase:health`));
+        }
+      } else {
+        console.log(pc.red(`\nCheck fallido para ${pc.bold(res.phase.task_id)}. Fix abierto: ${pc.bold(res.fixTask)}`));
+        res.diagnostics.forEach((d) => console.log(pc.red(`  - [${d.category}] ${d.gate}: ${pc.white(d.suggestion)}`)));
+        console.log(pc.yellow(`\nCorrige el bug y vuelve a ejecutar: agt phase:check`));
+      }
+      console.log(pc.dim(`Bitácora: ${res.logPath}\n`));
+      if (!res.passed) {
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(pc.red(`\nError en el check de fase: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: phase:health [planId]
+ * Healthcheck final del plan; si falla abre un hotfix.
+ */
+program
+  .command('phase:health [planId]')
+  .description('Ejecuta el healthcheck final del plan (completa o abre un hotfix)')
+  .action((planId) => {
+    try {
+      const res = runFinalHealthcheck({ planId });
+
+      res.results.forEach((r) => {
+        const line = `  ${r.passed ? "[PASS]" : "[FAIL]"} ${r.gate} -> ${pc.dim(r.command)}`;
+        console.log(r.passed ? pc.green(line) : pc.red(line));
+      });
+
+      if (res.passed) {
+        console.log(pc.green(`\nHealthcheck final en verde. Plan completado y modo por fases desactivado.`));
+      } else {
+        console.log(pc.red(`\nHealthcheck fallido. Hotfix abierto: ${pc.bold(res.hotfixTask)}`));
+        console.log(pc.yellow(`Corrige el bug y vuelve a ejecutar: agt phase:health`));
+      }
+      console.log(pc.dim(`Bitácora: ${res.logPath}\n`));
+      if (!res.passed) {
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(pc.red(`\nError en el healthcheck: ${error.message}\n`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * COMANDO: phase:status [planId]
+ * Muestra el estado del plan por fases activo.
+ */
+program
+  .command('phase:status [planId]')
+  .description('Muestra el estado del plan por fases (activo por defecto)')
+  .action((planId) => {
+    try {
+      const plan = getPhasePlan(planId);
+      console.log(pc.cyan(`\nPlan ${pc.bold(plan.id)}: ${plan.title} [${pc.yellow(plan.status)}]\n`));
+      plan.phases.forEach((p, i) => {
+        const color = p.status === 'DONE' ? pc.green : p.status === 'FIXING' ? pc.red : p.status === 'IN_PROGRESS' ? pc.yellow : pc.dim;
+        console.log(`  ${i + 1}. ${pc.bold(p.task_id.padEnd(14))} [${color(p.status.padEnd(11))}] ${p.title}`);
+      });
+      const open = plan.fixes.filter((f) => f.status === 'OPEN');
+      if (open.length > 0) {
+        console.log(pc.red(`\n  Correcciones abiertas: ${open.map((f) => `${f.id} (${f.type})`).join(', ')}`));
+      }
+      console.log(pc.dim(`\nBitácora: docs/bitacora/${plan.id}.md\n`));
+    } catch (error) {
+      console.error(pc.red(`\n${error.message}\n`));
       process.exit(1);
     }
   });

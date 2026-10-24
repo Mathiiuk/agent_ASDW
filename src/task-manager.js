@@ -274,3 +274,20 @@ export function updateTaskStatus(id, newStatus, projectRoot = process.cwd()) {
   fs.writeFileSync(taskYamlPath, yaml.dump(taskData, { indent: 2 }), 'utf-8');
   return taskData;
 }
+
+/**
+ * Actualiza campos arbitrarios del manifiesto YAML de una tarea (merge superficial).
+ *
+ * @param {string} id - Identificador de la tarea
+ * @param {object} changes - Campos a sobrescribir (ej: { quality_gates, commands })
+ * @param {string} projectRoot - Directorio raíz del proyecto
+ * @returns {object} - Manifiesto actualizado
+ */
+export function updateTask(id, changes, projectRoot = process.cwd()) {
+  const taskYamlPath = path.join(projectRoot, DIRS.tasks, `${id}.yml`);
+  // Combinamos los datos actuales con los cambios recibidos
+  const taskData = { ...getTask(id, projectRoot), ...changes };
+  // Persistimos el manifiesto actualizado
+  fs.writeFileSync(taskYamlPath, yaml.dump(taskData, { indent: 2 }), 'utf-8');
+  return taskData;
+}

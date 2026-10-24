@@ -68,3 +68,25 @@ Cuando el usuario asigne un requerimiento, el agente debe ejecutar las siguiente
    - El agente de IA es quien lee ese diagnóstico, localiza la causa raíz en el código fuente y aplica el parche de forma autónoma con sus propias herramientas de edición.
    - Volver a invocar `run_self_healing_loop` / `verify_task_quality_gates` tras cada corrección, en bucle, hasta que **el 100% de los checks estén en verde**.
 5. **Cierre y Notificación:** Crear el reporte de ejecución en `.agents/workflow/executions/<ID>.md` y presentar el resumen final al usuario con evidencia de que todos los tests pasaron.
+
+---
+
+## 4. Modo de Desarrollo por Fases (Opcional)
+
+Para desarrollos grandes divididos en varias features, activar el **modo por fases**. El flujo es estrictamente secuencial y queda documentado en la bitácora `docs/bitacora/<PLAN-ID>.md`:
+
+```
+feat 1 → check ✔ → feat 2 → check ✖ → fix → check ✔ → ... → healthcheck final ✖ → hotfix → healthcheck ✔ → COMPLETED
+```
+
+1. **Activar:** `agt phase:start <PLAN-ID> -t "Título" -p "<TASK-ID>:<Título feat 1>" -p "<TASK-ID>:<Título feat 2>"`
+   - Crea las tareas `feat` faltantes (sin rama propia: todo el plan vive en la rama activa).
+   - Opcional: `--health "<gate>=<comando>"` (repetible) para el healthcheck final. Por defecto: `pnpm test` y `pnpm test:bdd`.
+2. **Desarrollar la feat actual** (TDD/BDD) y ejecutar **`agt phase:check`**:
+   - ✔ **Verde:** la feat pasa a `READY_FOR_PR` y se inicia automáticamente la siguiente.
+   - ✖ **Bug:** se crea la tarea `<TASK-ID>-FIX-<n>` (tipo `fix`) con los mismos gates. Corregir y re-ejecutar `agt phase:check` hasta que esté en verde (el fix se marca `RESOLVED`). **No se avanza a la siguiente feat con un fix abierto.**
+3. **Healthcheck final:** al completar todas las fases, ejecutar **`agt phase:health`** (suite completa):
+   - ✔ **Verde:** el plan queda `COMPLETED` y el modo por fases se desactiva.
+   - ✖ **Bug:** se crea la tarea `<PLAN-ID>-HOTFIX-<n>` (tipo `hotfix`). Corregir y re-ejecutar `agt phase:health`.
+4. **Vía MCP:** las mismas acciones están disponibles como tools `start_phased_plan`, `check_current_phase`, `run_final_healthcheck` y `get_phased_plan`; tras cada fallo, leer el diagnóstico devuelto, corregir el código y volver a invocar la tool.
+5. **Seguimiento:** `agt phase:status` muestra fases, fixes abiertos y la ruta de la bitácora. La bitácora se regenera en cada paso con la tabla de fases, fixes/hotfixes, resultado del healthcheck y el registro cronológico de eventos; debe commitearse junto con el código.
